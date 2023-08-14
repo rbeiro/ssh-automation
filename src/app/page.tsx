@@ -61,6 +61,7 @@ export default function Home() {
         params: data,
       })
       .then((data) => {
+        console.log(data);
         if (data.status == 200) {
           setStatus("ok");
         }

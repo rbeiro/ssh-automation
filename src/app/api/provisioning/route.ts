@@ -13,7 +13,6 @@ interface BodyRequestParams {
 }
 
 export const fetchCache = "force-no-store";
-export const dynamic = "force-static";
 
 export async function POST(request: Request) {
   //console.log(request);
@@ -51,7 +50,6 @@ export async function POST(request: Request) {
           "aes256-cbc",
           "aes192-cbc",
           "aes128-cbc",
-          "blowfish-cbc",
           "3des-cbc",
           "arcfour256",
           "arcfour128",
