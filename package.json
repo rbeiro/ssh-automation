@@ -39,6 +39,7 @@
     "zod": "^3.21.4"
   },
   "devDependencies": {
-    "@types/ssh2": "^1.11.13"
+    "@types/ssh2": "^1.11.13",
+    "ignore-loader": "^0.1.2"
   }
 }

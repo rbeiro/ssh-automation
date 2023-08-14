@@ -1,9 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   webpack: (config) => {
-    return (config.resolve.fallback = {
-      sshcrypto: false,
+    config.module.rules.push({
+      test: /\.node$/,
+      loader: "ignore-loader",
     });
+
+    return config;
   },
 };
 

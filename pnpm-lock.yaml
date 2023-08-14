@@ -19,6 +19,7 @@ specifiers:
   csv-parse: ^5.4.0
   eslint: 8.46.0
   eslint-config-next: 13.4.13
+  ignore-loader: ^0.1.2
   next: 13.4.13
   node-openvpn: ^0.1.1
   node-ssh: ^13.1.0
@@ -63,6 +64,7 @@ dependencies:
 
 devDependencies:
   '@types/ssh2': 1.11.13
+  ignore-loader: 0.1.2
 
 packages:
 
@@ -1629,6 +1631,10 @@ packages:
     resolution: {integrity: sha512-nZXjEF2nbo7lIw3mgYjItAfgQXog3OjJogSbKa2CQIIvSGWcKgeJnQlNXip6NglNzYH45nSRiEVimMvYL8DDqQ==}
     engines: {node: '>=14.18.0'}
     dev: false
+
+  /ignore-loader/0.1.2:
+    resolution: {integrity: sha512-yOJQEKrNwoYqrWLS4DcnzM7SEQhRKis5mB+LdKKh4cPmGYlLPR0ozRzHV5jmEk2IxptqJNQA5Cc0gw8Fj12bXA==}
+    dev: true
 
   /ignore/5.2.4:
     resolution: {integrity: sha512-MAb38BcSbH0eHNBxn7ql2NH/kX33OkB3lZ1BNdh7ENeRChHTYsTvWrMubiIAMNS2llXEEgZ1MUOBtXChP3kaFQ==}
