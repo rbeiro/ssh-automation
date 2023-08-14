@@ -51,7 +51,6 @@ export async function POST(request: Request) {
           "aes192-cbc",
           "aes128-cbc",
           "3des-cbc",
-          "arcfour256",
           "arcfour128",
           "cast128-cbc",
           "arcfour",
