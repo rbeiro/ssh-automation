@@ -12,6 +12,9 @@ interface BodyRequestParams {
   clientNameOLT2: string;
 }
 
+export const fetchCache = "force-no-store";
+export const dynamic = "force-static";
+
 export async function POST(request: Request) {
   //console.log(request);
   if (request.method !== "POST") {
