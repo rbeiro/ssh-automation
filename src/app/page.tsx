@@ -34,23 +34,17 @@ export default function Home() {
     formState: { isSubmitting, errors },
   } = useForm<ProvisioningFormInput>({
     resolver: zodResolver(provisioningSchema),
+    defaultValues: {
+      serialNumber: "ALCL:FC598766",
+      slotGPON: "4",
+      PONport: "4",
+      ONUposition: "2",
+      QoSProfilePPPoE: "HSI_1G_UP",
+      VLANClient: "10",
+      clientNameOLT: "TESTE - FORMULARIO",
+      clientNameOLT2: "GABRIEL",
+    },
   });
-  // const { data } = useQuery({
-  //   queryKey: ["create-provisioning"],
-  //   queryFn: async () =>
-  //     await api.post("/provisioning", {
-  //       params: {
-  //         serialNumber: "ALCL:FC31BF03",
-  //         slotGPON: 4,
-  //         PONport: 16,
-  //         ONUposition: 2,
-  //         QoSProfilePPPoE: "HSI_1G_UP",
-  //         VLANClient: 10,
-  //         clientNameOLT: "TESTE NOKIA AUTO",
-  //         clientNameOLT2: "TESTE NOKIA AUTO",
-  //       },
-  //     }),
-  // });
   console.log(errors);
 
   async function handleProvising(data: ProvisioningFormInput) {
