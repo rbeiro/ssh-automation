@@ -1,0 +1,43 @@
+{
+  "name": "ssh-test",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^3.2.0",
+    "@radix-ui/react-icons": "^1.3.0",
+    "@rbeiro-ui/react-components": "^0.0.17",
+    "@rbeiro-ui/tokens": "^0.0.4",
+    "@tanstack/react-query": "^4.32.6",
+    "@tanstack/react-query-devtools": "^4.32.6",
+    "@tanstack/react-query-next-experimental": "5.0.0-alpha.80",
+    "@types/node": "20.4.8",
+    "@types/react": "18.2.18",
+    "@types/react-dom": "18.2.7",
+    "axios": "^1.4.0",
+    "cpu-features": "^0.0.8",
+    "crypto-js": "^4.1.1",
+    "csv-parse": "^5.4.0",
+    "eslint": "8.46.0",
+    "eslint-config-next": "13.4.13",
+    "next": "13.4.13",
+    "node-openvpn": "^0.1.1",
+    "node-ssh": "^13.1.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-hook-form": "^7.45.4",
+    "sass": "^1.65.1",
+    "simple-ssh": "^1.1.1",
+    "ssh2": "1.14.0",
+    "typescript": "5.1.6",
+    "zod": "^3.21.4"
+  },
+  "devDependencies": {
+    "@types/ssh2": "^1.11.13"
+  }
+}
