@@ -85,7 +85,6 @@ export default function Home() {
       .then((response) => {
         if (response.status == 201) {
           setUnprovisionedONU(response.data.commandLineResult);
-          setStatus("peguei");
         }
       })
       .finally(() => setIsLoading(false));
