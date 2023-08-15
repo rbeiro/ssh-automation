@@ -9,7 +9,7 @@ import { api } from "@/lib/axios";
 import { z } from "zod";
 
 import { Button, Input, LoadingSpinner } from "@rbeiro-ui/react-components";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const provisioningSchema = z.object({
   serialNumber: z.string(),
@@ -27,6 +27,9 @@ type ProvisioningFormInput = z.input<typeof provisioningSchema>;
 export default function Home() {
   const [status, setStatus] = useState("");
   const [commandLineResult, setCommandLineResult] = useState<
+    { id: string; line: string }[] | null
+  >(null);
+  const [unprovisionedONU, setUnprovisionedONU] = useState<
     { id: string; line: string }[] | null
   >(null);
 
@@ -50,12 +53,8 @@ export default function Home() {
       clientNameOLT2: "GABRIEL",
     },
   });
-  console.log(errors);
 
   async function handleProvising(data: ProvisioningFormInput) {
-    console.log(data);
-    console.log(errors);
-
     setIsLoading(true);
     setCommandLineResult(null);
     api
@@ -67,7 +66,6 @@ export default function Home() {
         { timeout: 15000 }
       )
       .then((response) => {
-        console.log(response);
         if (response.status == 201) {
           setCommandLineResult(response.data.commandLineResult);
           setStatus("ok");
@@ -75,8 +73,34 @@ export default function Home() {
       })
       .finally(() => setIsLoading(false));
   }
+  async function getUnprovisionedONUs() {
+    setIsLoading(true);
+    setCommandLineResult(null);
+    api
+      .get(
+        "/unprovisioned",
 
-  console.log(commandLineResult);
+        { timeout: 15000 }
+      )
+      .then((response) => {
+        if (response.status == 201) {
+          setUnprovisionedONU(response.data.commandLineResult);
+          setStatus("peguei");
+        }
+      })
+      .finally(() => setIsLoading(false));
+  }
+
+  useEffect(() => {
+    getUnprovisionedONUs();
+  }, []);
+
+  console.log(unprovisionedONU);
+
+  const noUnprovisionedONU = unprovisionedONU?.find((string) =>
+    string.line.includes("unprovision-onu count : 0")
+  );
+
   return (
     <main className={styles.main}>
       <form className={styles.form} onSubmit={handleSubmit(handleProvising)}>
@@ -113,6 +137,18 @@ export default function Home() {
 
         {!commandLineResult && isLoading && <LoadingSpinner />}
         {!commandLineResult && !isLoading && <li>Nenhum resultado ainda...</li>}
+      </ul>
+
+      <ul className={styles.commandLine}>
+        {!noUnprovisionedONU &&
+          unprovisionedONU &&
+          unprovisionedONU.map(({ id, line }) => {
+            return <li key={id}>{line}</li>;
+          })}
+
+        {!unprovisionedONU && isLoading && <LoadingSpinner />}
+        {!unprovisionedONU && !isLoading && <li>Nenhum resultado ainda...</li>}
+        {noUnprovisionedONU && <li>Todas ONUs estão provisionadas</li>}
       </ul>
     </main>
   );

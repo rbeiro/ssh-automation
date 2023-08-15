@@ -12,12 +12,11 @@ interface BodyRequestParams {
   clientNameOLT2: string;
 }
 
-export async function POST(request: Request) {
-  if (request.method !== "POST") {
+export async function GET(request: Request) {
+  if (request.method !== "GET") {
     return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
   }
   const sshClient = new Client();
-  const { params }: { params: BodyRequestParams } = await request.json();
   const outputData: Array<{ id: string; line: string }> = [];
 
   const connectToSshAndExecuteCommands = () => {
@@ -70,6 +69,7 @@ export async function POST(request: Request) {
             })
             .on("data", (data: Buffer) => {
               const dataAsString = data.toString();
+              console.log(dataAsString);
               outputData.push({
                 id: crypto.randomUUID(),
                 line: dataAsString,
@@ -78,43 +78,13 @@ export async function POST(request: Request) {
               switch (dataAsString) {
                 case "end":
                   sshClient.end();
-                // case "Completed.":
-                //   NextResponse;
-                //   return NextResponse.json({ message: "Sucesso" }, { status: 201 });
 
                 default:
               }
             });
 
-          const ONTInterfaceBase = `1/1/${params.slotGPON}/${params.PONport}/${params.ONUposition}`;
+          stream.stdin.write(`show pon unprovision-onu\n`);
 
-          stream.stdin.write(
-            `configure equipment ont interface ${ONTInterfaceBase} sernum ${params.serialNumber} sw-ver-pland disabled optics-hist enable\n`
-          );
-          stream.stdin.write(
-            `configure equipment ont interface ${ONTInterfaceBase} desc1 "${params.clientNameOLT}" admin-state up\n`
-          );
-          stream.stdin.write(
-            `configure equipment ont interface ${ONTInterfaceBase} desc2 "${params.clientNameOLT2}"\n`
-          );
-          stream.stdin.write(
-            `configure equipment ont slot ${ONTInterfaceBase}/14 plndnumdataports 1 plndnumvoiceports 0 planned-card-type veip admin-state up\n`
-          );
-          stream.stdin.write(
-            `configure qos           interface ${ONTInterfaceBase}/14/1 upstream-queue 0 bandwidth-profile name:${params.QoSProfilePPPoE}\n`
-          );
-          stream.stdin.write(
-            `configure interface port      uni:${ONTInterfaceBase}/14/1 admin-up\n`
-          );
-          stream.stdin.write(
-            `configure bridge             port ${ONTInterfaceBase}/14/1 max-unicast-mac 32 max-committed-mac 1\n`
-          );
-          stream.stdin.write(
-            `vlan-id ${params.VLANClient} tag single-tagged\n`
-          );
-          stream.stdin.write("exit\n");
-          stream.stdin.write("exit all\n");
-          stream.stdin.write("admin save\n");
           stream.stdin.write("end");
         });
 
