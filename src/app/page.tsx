@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { api } from "@/lib/axios";
 import { z } from "zod";
 
-import { Button, Input } from "@rbeiro-ui/react-components";
+import { Button, Input, LoadingSpinner } from "@rbeiro-ui/react-components";
 import { useState } from "react";
 
 const provisioningSchema = z.object({
@@ -26,6 +26,11 @@ type ProvisioningFormInput = z.input<typeof provisioningSchema>;
 
 export default function Home() {
   const [status, setStatus] = useState("");
+  const [commandLineResult, setCommandLineResult] = useState<
+    { id: string; line: string }[] | null
+  >(null);
+
+  const [isLoading, setIsLoading] = useState(false);
   const {
     register,
     handleSubmit,
@@ -50,17 +55,28 @@ export default function Home() {
   async function handleProvising(data: ProvisioningFormInput) {
     console.log(data);
     console.log(errors);
+
+    setIsLoading(true);
+    setCommandLineResult(null);
     api
-      .post("/provisioning", {
-        params: data,
-      })
-      .then((data) => {
-        console.log(data);
-        if (data.status == 200) {
+      .post(
+        "/provisioning",
+        {
+          params: data,
+        },
+        { timeout: 15000 }
+      )
+      .then((response) => {
+        console.log(response);
+        if (response.status == 201) {
+          setCommandLineResult(response.data.commandLineResult);
           setStatus("ok");
         }
-      });
+      })
+      .finally(() => setIsLoading(false));
   }
+
+  console.log(commandLineResult);
   return (
     <main className={styles.main}>
       <form className={styles.form} onSubmit={handleSubmit(handleProvising)}>
@@ -81,11 +97,23 @@ export default function Home() {
           labelName="Descrição para Identificação do Assinante na CTO e/ou 2ª descrição"
           {...register("clientNameOLT2")}
         />
-        <div>
-          <Button type="submit">Provisionar</Button>
+        <div className={styles.formButton}>
+          <Button type="submit" isLoading={isLoading}>
+            Provisionar
+          </Button>
           {status && status}
         </div>
       </form>
+
+      <ul className={styles.commandLine}>
+        {commandLineResult &&
+          commandLineResult.map(({ id, line }) => {
+            return <li key={id}>{line}</li>;
+          })}
+
+        {!commandLineResult && isLoading && <LoadingSpinner />}
+        {!commandLineResult && !isLoading && <li>Nenhum resultado ainda...</li>}
+      </ul>
     </main>
   );
 }

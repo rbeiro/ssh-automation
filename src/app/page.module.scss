@@ -1,14 +1,15 @@
 .main {
+  --input-label-background: var(--color-gray4);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  gap: 2rem;
   align-items: center;
   padding: 6rem;
   min-height: 100vh;
 }
 
 .form {
-  --input-label-background: var(--color-gray4);
   width: 100%;
   height: 100%;
   background: var(--input-label-background);
@@ -18,6 +19,32 @@
   flex-direction: column;
   gap: 1.5rem;
   color: var(--color-gray12);
+}
+
+.formButton {
+  display: flex;
+  gap: 1rem;
+}
+
+.commandLine {
+  list-style-type: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 3rem;
+  width: 100%;
+  min-height: 24px;
+  height: 100%;
+
+  background: var(--input-label-background);
+  border-radius: var(--rounded-md);
+  color: var(--color-gray12);
+
+  position: relative;
+  & > div {
+    left: 3rem;
+    transform: translateY(-50%);
+  }
 }
 
 .description {
