@@ -100,6 +100,8 @@ export default function Home() {
     string.line.includes("unprovision-onu count : 0")
   );
 
+  const isThereUnprovisionedONUs = !noUnprovisionedONU && unprovisionedONU;
+
   return (
     <main className={styles.main}>
       <form className={styles.form} onSubmit={handleSubmit(handleProvising)}>
@@ -139,8 +141,7 @@ export default function Home() {
       </ul>
 
       <ul className={styles.commandLine}>
-        {!noUnprovisionedONU &&
-          unprovisionedONU &&
+        {isThereUnprovisionedONUs &&
           unprovisionedONU.map(({ id, line }) => {
             return <li key={id}>{line}</li>;
           })}
