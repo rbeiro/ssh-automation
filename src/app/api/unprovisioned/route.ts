@@ -1,6 +1,8 @@
 import { Client } from "ssh2";
 import { NextResponse } from "next/server";
 
+const fetchCache = "force-no-store";
+
 interface BodyRequestParams {
   serialNumber: string;
   slotGPON: number;

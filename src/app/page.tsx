@@ -10,22 +10,19 @@ import { z } from "zod";
 
 import { Button, Input, LoadingSpinner } from "@rbeiro-ui/react-components";
 import { useEffect, useState } from "react";
-
-const provisioningSchema = z.object({
-  serialNumber: z.string(),
-  slotGPON: z.string(),
-  PONport: z.string(),
-  ONUposition: z.string(),
-  QoSProfilePPPoE: z.string(),
-  VLANClient: z.string(),
-  clientNameOLT: z.string(),
-  clientNameOLT2: z.string(),
-});
-
-type ProvisioningFormInput = z.input<typeof provisioningSchema>;
+import { ProvisioningForm } from "@/components/ProvisioningForm";
 
 export default function Home() {
-  const [status, setStatus] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [formDataFromUnprovisionedONU, setFormDataFromUnprovisionedONU] =
+    useState<
+      | {
+          serialNumber: string;
+          slotGPON: string;
+          PONport: string;
+        }
+      | undefined
+    >(undefined);
   const [commandLineResult, setCommandLineResult] = useState<
     { id: string; line: string }[] | null
   >(null);
@@ -33,48 +30,9 @@ export default function Home() {
     { id: string; line: string }[] | null
   >(null);
 
-  const [isLoading, setIsLoading] = useState(false);
-  const {
-    register,
-    handleSubmit,
-    control,
-    watch,
-    formState: { isSubmitting, errors },
-  } = useForm<ProvisioningFormInput>({
-    resolver: zodResolver(provisioningSchema),
-    defaultValues: {
-      serialNumber: "ALCL:FC598766",
-      slotGPON: "4",
-      PONport: "4",
-      ONUposition: "2",
-      QoSProfilePPPoE: "HSI_1G_UP",
-      VLANClient: "10",
-      clientNameOLT: "TESTE - FORMULARIO",
-      clientNameOLT2: "GABRIEL",
-    },
-  });
-
-  async function handleProvising(data: ProvisioningFormInput) {
-    setIsLoading(true);
-    setCommandLineResult(null);
-    api
-      .post(
-        "/provisioning",
-        {
-          params: data,
-        },
-        { timeout: 15000 }
-      )
-      .then((response) => {
-        if (response.status == 201) {
-          setCommandLineResult(response.data.commandLineResult);
-          setStatus("ok");
-        }
-      })
-      .finally(() => setIsLoading(false));
-  }
   async function getUnprovisionedONUs() {
     setIsLoading(true);
+
     setCommandLineResult(null);
     api
       .get(
@@ -102,33 +60,41 @@ export default function Home() {
 
   const isThereUnprovisionedONUs = !noUnprovisionedONU && unprovisionedONU;
 
+  function getSerialNumberFromCommandLine(line: string) {
+    const startOfSerial = line.indexOf("ALCL");
+    const serialNumber = line.slice(startOfSerial, startOfSerial + 12);
+    const serialNumberWithTwoDots =
+      serialNumber.slice(0, 4) + ":" + serialNumber.slice(4);
+
+    return serialNumberWithTwoDots;
+  }
+
+  function locations(substring: string, string: string) {
+    var a = [],
+      i = -1;
+    while ((i = string.indexOf(substring, i + 1)) >= 0) a.push(i);
+    return a;
+  }
+
+  function handleUnprovisionedONUAdditionToForm(string: string) {
+    const serialNumberWithTwoDots = getSerialNumberFromCommandLine(string);
+    const indexesOfSlashes = locations("/", string);
+    const slotGPON = string[indexesOfSlashes[1] + 1];
+    const PONport = string[indexesOfSlashes[2] + 1];
+
+    setFormDataFromUnprovisionedONU({
+      serialNumber: serialNumberWithTwoDots,
+      PONport,
+      slotGPON,
+    });
+  }
+
   return (
     <main className={styles.main}>
-      <form className={styles.form} onSubmit={handleSubmit(handleProvising)}>
-        <Input labelName="Serial Number da ONT" {...register("serialNumber")} />
-        <Input labelName="Slot GPON" {...register("slotGPON")} />
-        <Input labelName="Porta PON" {...register("PONport")} />
-        <Input labelName="Posição da ONU" {...register("ONUposition")} />
-        <Input
-          labelName="Perfil de banda QoS Upstream PPoE"
-          {...register("QoSProfilePPPoE")}
-        />
-        <Input labelName="VLAN Client PPPoE" {...register("VLANClient")} />
-        <Input
-          labelName="Descrição para Identificação do Assinante na OLT"
-          {...register("clientNameOLT")}
-        />
-        <Input
-          labelName="Descrição para Identificação do Assinante na CTO e/ou 2ª descrição"
-          {...register("clientNameOLT2")}
-        />
-        <div className={styles.formButton}>
-          <Button type="submit" isLoading={isLoading}>
-            Provisionar
-          </Button>
-          {status && status}
-        </div>
-      </form>
+      <ProvisioningForm
+        onFormResult={setCommandLineResult}
+        unprovisionedONUData={formDataFromUnprovisionedONU}
+      />
 
       <ul className={styles.commandLine}>
         {commandLineResult &&
@@ -143,7 +109,22 @@ export default function Home() {
       <ul className={styles.commandLine}>
         {isThereUnprovisionedONUs &&
           unprovisionedONU.map(({ id, line }) => {
-            return <li key={id}>{line}</li>;
+            if (!line.includes("ALCL")) return;
+
+            const serialNumberWithTwoDots =
+              getSerialNumberFromCommandLine(line);
+
+            return (
+              <li key={id} className={styles["unprovisioned__result"]}>
+                <span>{serialNumberWithTwoDots}</span>
+                <Button
+                  size="xs"
+                  onClick={() => handleUnprovisionedONUAdditionToForm(line)}
+                >
+                  Adicionar ao formulário
+                </Button>
+              </li>
+            );
           })}
 
         {!unprovisionedONU && isLoading && <LoadingSpinner />}
