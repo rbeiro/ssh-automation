@@ -11,6 +11,7 @@ import { z } from "zod";
 import { Button, Input, LoadingSpinner } from "@rbeiro-ui/react-components";
 import { useEffect, useState } from "react";
 import { ProvisioningForm } from "@/components/ProvisioningForm";
+import { DeprovisionForm } from "@/components/DeprovisionForm";
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
@@ -26,6 +27,8 @@ export default function Home() {
   const [commandLineResult, setCommandLineResult] = useState<
     { id: string; line: string }[] | null
   >(null);
+  const [deprovisionCommandLineResult, setDeprovisionCommandLineResult] =
+    useState<{ id: string; line: string }[] | null>(null);
   const [unprovisionedONU, setUnprovisionedONU] = useState<
     { id: string; line: string }[] | null
   >(null);
@@ -96,41 +99,68 @@ export default function Home() {
         unprovisionedONUData={formDataFromUnprovisionedONU}
       />
 
-      <ul className={styles.commandLine}>
-        {commandLineResult &&
-          commandLineResult.map(({ id, line }) => {
-            return <li key={id}>{line}</li>;
-          })}
+      <div className={styles.box}>
+        <h2>Resultado do formulário acima:</h2>
+        <ul className={styles.commandLine}>
+          {commandLineResult &&
+            commandLineResult.map(({ id, line }) => {
+              return <li key={id}>{line}</li>;
+            })}
 
-        {!commandLineResult && isLoading && <LoadingSpinner />}
-        {!commandLineResult && !isLoading && <li>Nenhum resultado ainda...</li>}
-      </ul>
+          {!commandLineResult && isLoading && <LoadingSpinner />}
+          {!commandLineResult && !isLoading && (
+            <li>Nenhum resultado ainda...</li>
+          )}
+        </ul>
+      </div>
 
-      <ul className={styles.commandLine}>
-        {isThereUnprovisionedONUs &&
-          unprovisionedONU.map(({ id, line }) => {
-            if (!line.includes("ALCL")) return;
+      <DeprovisionForm onFormResult={setDeprovisionCommandLineResult} />
 
-            const serialNumberWithTwoDots =
-              getSerialNumberFromCommandLine(line);
+      <div className={styles.box}>
+        <h2>Resultado do formulário acima:</h2>
+        <ul className={styles.commandLine}>
+          {deprovisionCommandLineResult &&
+            deprovisionCommandLineResult.map(({ id, line }) => {
+              return <li key={id}>{line}</li>;
+            })}
 
-            return (
-              <li key={id} className={styles["unprovisioned__result"]}>
-                <span>{serialNumberWithTwoDots}</span>
-                <Button
-                  size="xs"
-                  onClick={() => handleUnprovisionedONUAdditionToForm(line)}
-                >
-                  Adicionar ao formulário
-                </Button>
-              </li>
-            );
-          })}
+          {!deprovisionCommandLineResult && isLoading && <LoadingSpinner />}
+          {!deprovisionCommandLineResult && !isLoading && (
+            <li>Nenhum resultado ainda...</li>
+          )}
+        </ul>
+      </div>
 
-        {!unprovisionedONU && isLoading && <LoadingSpinner />}
-        {!unprovisionedONU && !isLoading && <li>Nenhum resultado ainda...</li>}
-        {noUnprovisionedONU && <li>Todas ONUs estão provisionadas</li>}
-      </ul>
+      <div className={styles.box}>
+        <h2>ONUs não provisionadas:</h2>
+        <ul className={styles.commandLine}>
+          {isThereUnprovisionedONUs &&
+            unprovisionedONU.map(({ id, line }) => {
+              if (!line.includes("ALCL")) return;
+
+              const serialNumberWithTwoDots =
+                getSerialNumberFromCommandLine(line);
+
+              return (
+                <li key={id} className={styles["unprovisioned__result"]}>
+                  <span>{serialNumberWithTwoDots}</span>
+                  <Button
+                    size="xs"
+                    onClick={() => handleUnprovisionedONUAdditionToForm(line)}
+                  >
+                    Adicionar ao formulário
+                  </Button>
+                </li>
+              );
+            })}
+
+          {!unprovisionedONU && isLoading && <LoadingSpinner />}
+          {!unprovisionedONU && !isLoading && (
+            <li>Nenhum resultado ainda...</li>
+          )}
+          {noUnprovisionedONU && <li>Todas ONUs estão provisionadas</li>}
+        </ul>
+      </div>
     </main>
   );
 }

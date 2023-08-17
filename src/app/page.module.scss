@@ -13,7 +13,9 @@
   display: flex;
   gap: 1rem;
 }
-
+.box {
+  width: 100%;
+}
 .commandLine {
   list-style-type: none;
   display: flex;
