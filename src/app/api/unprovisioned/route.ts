@@ -3,17 +3,6 @@ import { NextResponse } from "next/server";
 
 const fetchCache = "force-no-store";
 
-interface BodyRequestParams {
-  serialNumber: string;
-  slotGPON: number;
-  PONport: number;
-  ONUposition: number;
-  QoSProfilePPPoE: string;
-  VLANClient: number;
-  clientNameOLT: string;
-  clientNameOLT2: string;
-}
-
 export async function GET(request: Request) {
   if (request.method !== "GET") {
     return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
@@ -103,6 +92,7 @@ export async function GET(request: Request) {
   };
 
   const response = await connectToSshAndExecuteCommands();
+
   return NextResponse.json({ commandLineResult: response }, { status: 201 });
 }
 ``;

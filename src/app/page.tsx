@@ -31,7 +31,7 @@ export default function Home() {
     useState<{ id: string; line: string }[] | null>(null);
   const [unprovisionedONU, setUnprovisionedONU] = useState<
     { id: string; line: string }[] | null
-  >(null);
+  >([{ id: "teste", line: "176        1/1/1/11   ALCLFC20A863 DEFAULT " }]);
 
   async function getUnprovisionedONUs() {
     setIsLoading(true);
@@ -53,9 +53,9 @@ export default function Home() {
 
   useEffect(() => {
     getUnprovisionedONUs();
-  }, []);
+  }, [formDataFromUnprovisionedONU]);
 
-  console.log(unprovisionedONU);
+  //console.log(unprovisionedONU);
 
   const noUnprovisionedONU = unprovisionedONU?.find((string) =>
     string.line.includes("unprovision-onu count : 0")
@@ -80,10 +80,26 @@ export default function Home() {
   }
 
   function handleUnprovisionedONUAdditionToForm(string: string) {
+    console.log(string);
     const serialNumberWithTwoDots = getSerialNumberFromCommandLine(string);
     const indexesOfSlashes = locations("/", string);
-    const slotGPON = string[indexesOfSlashes[1] + 1];
-    const PONport = string[indexesOfSlashes[2] + 1];
+
+    const doesSecondNumberOfSlotGPONExist = !!Number(
+      string[indexesOfSlashes[1] + 2]
+    );
+
+    console.log(doesSecondNumberOfSlotGPONExist);
+    const slotGPON = doesSecondNumberOfSlotGPONExist
+      ? string[indexesOfSlashes[1] + 1] + string[indexesOfSlashes[1] + 2]
+      : string[indexesOfSlashes[1] + 1];
+
+    const doesSecondNumberOfPONPortExist = !!Number(
+      string[indexesOfSlashes[2] + 2]
+    );
+    console.log(doesSecondNumberOfPONPortExist);
+    const PONport = doesSecondNumberOfPONPortExist
+      ? string[indexesOfSlashes[2] + 1] + string[indexesOfSlashes[2] + 2]
+      : string[indexesOfSlashes[2] + 1];
 
     setFormDataFromUnprovisionedONU({
       serialNumber: serialNumberWithTwoDots,
@@ -119,8 +135,8 @@ export default function Home() {
       <div className={styles.box}>
         <h2>Resultado do formulário acima:</h2>
         <ul className={styles.commandLine}>
-          {deprovisionCommandLineResult &&
-            deprovisionCommandLineResult.map(({ id, line }) => {
+          {commandLineResult &&
+            commandLineResult.map(({ id, line }) => {
               return <li key={id}>{line}</li>;
             })}
 
@@ -146,7 +162,11 @@ export default function Home() {
                   <span>{serialNumberWithTwoDots}</span>
                   <Button
                     size="xs"
-                    onClick={() => handleUnprovisionedONUAdditionToForm(line)}
+                    onClick={() =>
+                      handleUnprovisionedONUAdditionToForm(
+                        "176        1/1/1/11   ALCLFC20A863 DEFAULT"
+                      )
+                    }
                   >
                     Adicionar ao formulário
                   </Button>
