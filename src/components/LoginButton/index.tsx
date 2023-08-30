@@ -13,6 +13,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRightIcon } from "@radix-ui/react-icons";
 import { env } from "@/env.mjs";
 import { useRouter, useSearchParams } from "next/navigation";
+import toast from "react-hot-toast";
 
 export const LoginButton = () => {
   useEffect(() => {
@@ -124,22 +125,31 @@ const ConfirmCodeContent = ({
     const verificationUrl = `${currentUrlOrigin}/api/auth/callback/email?callbackUrl=${currentUrl}&token=${verificaitonCode}&email=${
       userEmail || ""
     }`;
-    fetch(verificationUrl)
-      .then((data) => {
-        if (data.status !== 200) {
+    toast.promise(
+      fetch(verificationUrl)
+        .then((data) => {
+          if (data.status !== 200) {
+            setVerificationErrorMessage(
+              "O código é inválido. Tente novamente."
+            );
+            return;
+          } else {
+            setVerificationSuccessMessage(
+              "Sucesso! Aguarde o redirecionamento da página..."
+            );
+            window.location.reload();
+          }
+        })
+        .catch((err) => {
           setVerificationErrorMessage("O código é inválido. Tente novamente.");
-          return;
-        } else {
-          setVerificationSuccessMessage(
-            "Sucesso! Aguarde o redirecionamento da página..."
-          );
-          window.location.reload();
-        }
-      })
-      .catch((err) => {
-        setVerificationErrorMessage("O código é inválido. Tente novamente.");
-      })
-      .finally(() => setIsVerificationLoading(false));
+        })
+        .finally(() => setIsVerificationLoading(false)),
+      {
+        loading: "Carregando...",
+        error: <b>Não foi possível fazer o login</b>,
+        success: <b>Logado com sucesso!</b>,
+      }
+    );
   }
   return (
     <DialogPortal title="Confirme o código">

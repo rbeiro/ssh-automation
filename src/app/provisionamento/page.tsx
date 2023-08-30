@@ -6,8 +6,6 @@ import { UnprovisionedOnts } from "./components/UnprovisionedOnts";
 import styles from "./styles..module.scss";
 
 import useSearchParams from "@/utils/useSearchParams";
-
-import toast, { Toaster } from "react-hot-toast";
 import { CommandLine } from "@/components/CommandLine";
 import { useEffect, useState } from "react";
 
@@ -42,7 +40,6 @@ export default function ProvisioningPage() {
   return (
     <>
       <div className={styles["ProvisioningContainer"]}>
-        <Toaster />
         {(!doesUserHavePermission || isUserLoggedOut) && (
           <h1>Você não possui acesso, faça login</h1>
         )}

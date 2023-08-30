@@ -45,7 +45,7 @@ export const DeprovisionForm = ({ onFormResult }: ProvisioningFormProps) => {
         {
           params: data,
         },
-        { timeout: 15000 }
+        { timeout: 60000 }
       )
       .then((response) => {
         if (response.status == 201) {

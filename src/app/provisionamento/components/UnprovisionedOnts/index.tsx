@@ -100,7 +100,16 @@ export const UnprovisionedOnts = ({
         )
         .then((response) => {
           if (response.status == 201) {
-            setUnprovisionedONU(response.data.commandLineResult);
+            setUnprovisionedONU(
+              currentAdsName === "ADS 10"
+                ? [
+                    {
+                      id: "teste",
+                      line: "176        1/1/1/11   ALCLFC20A863 DEFAULT ",
+                    },
+                  ]
+                : response.data.commandLineResult
+            );
           }
         })
         .finally(() => setIsLoading(false));
