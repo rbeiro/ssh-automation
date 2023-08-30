@@ -19,6 +19,7 @@ export const UnprovisionedOnts = ({
   currentVendorName,
 }: BaseProps) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isGettingOnuPosition, setIsGettingOnuPosition] = useState(false);
   const [selectedUnprovisionedONT, setSelectedUnprovisionedONT] = useAtom(
     selectedUnprovisionedONTAtom
   );
@@ -44,39 +45,106 @@ export const UnprovisionedOnts = ({
 
     return serialNumberWithTwoDots;
   }
-  function handleUnprovisionedONUAdditionToForm(string: string) {
-    console.log(string);
+  async function handleUnprovisionedONUAdditionToForm(string: string) {
     const serialNumberWithTwoDots = getSerialNumberFromCommandLine(string);
     const indexesOfSlashes = locations("/", string);
 
-    const doesSecondNumberOfSlotGPONExist = !!Number(
-      string[indexesOfSlashes[1] + 2]
-    );
+    const doesSecondNumberOfSlotGPONExist =
+      !!Number(string[indexesOfSlashes[1] + 2]) ||
+      Number(string[indexesOfSlashes[1] + 2]) === 0;
 
-    console.log(doesSecondNumberOfSlotGPONExist);
     const slotGPON = doesSecondNumberOfSlotGPONExist
       ? string[indexesOfSlashes[1] + 1] + string[indexesOfSlashes[1] + 2]
       : string[indexesOfSlashes[1] + 1];
 
-    const doesSecondNumberOfPONPortExist = !!Number(
-      string[indexesOfSlashes[2] + 2]
-    );
-    console.log(doesSecondNumberOfPONPortExist);
+    const doesSecondNumberOfPONPortExist =
+      !!Number(string[indexesOfSlashes[2] + 2]) ||
+      Number(string[indexesOfSlashes[2] + 2]) === 0;
+
     const PONport = doesSecondNumberOfPONPortExist
       ? string[indexesOfSlashes[2] + 1] + string[indexesOfSlashes[2] + 2]
       : string[indexesOfSlashes[2] + 1];
+
+    const currentLastOnuPosition = await getLastOnuPosition({
+      currentAdsName,
+      currentVendorName,
+      slotGPON: slotGPON,
+      PONport: PONport,
+    });
 
     setSelectedUnprovisionedONT({
       serialNumber: serialNumberWithTwoDots,
       PONport,
       slotGPON,
-      ONUposition: "123",
+      ONUposition: String((currentLastOnuPosition || 0) + 1) || "",
     });
   }
 
   const noUnprovisionedONU = unprovisionedONU?.find((string) =>
     string.line.includes("unprovision-onu count : 0")
   );
+
+  async function getLastOnuPosition(data: {
+    currentAdsName: string;
+    currentVendorName: string;
+    slotGPON: string;
+    PONport: string;
+  }) {
+    setIsGettingOnuPosition(true);
+    return api
+      .post(
+        "/getAdsPosition",
+        {
+          params: {
+            currentAdsName: data.currentAdsName,
+            currentVendorName: data.currentVendorName,
+            slotGPON: data.slotGPON,
+            PONport: data.PONport,
+          },
+        },
+
+        { timeout: 15000 }
+      )
+      .then(
+        ({
+          data,
+          status,
+        }: {
+          data: { commandLineResult: Array<{ id: string; line: string }> };
+          status: number;
+        }) => {
+          if (status == 201) {
+            let ponCount;
+            data.commandLineResult.forEach(({ line }) => {
+              if (line.includes("pon count")) {
+                ponCount = line.match(/\d+/g)?.join("");
+              }
+            });
+
+            const foundOnts = data.commandLineResult.filter(({ line }) => {
+              if (line.includes("ALCL")) {
+                return line;
+              }
+            });
+            if (!ponCount) return;
+            const lastFoundOnt = foundOnts[Number(ponCount - 1)];
+
+            const indexesOfSlashes = locations("/", lastFoundOnt.line);
+            const doesSecondNumberOfSlotGPONExist =
+              !!Number(lastFoundOnt.line[indexesOfSlashes[6] + 2]) ||
+              Number(lastFoundOnt.line[indexesOfSlashes[6] + 2]) === 0;
+
+            return doesSecondNumberOfSlotGPONExist
+              ? Number(
+                  lastFoundOnt.line[indexesOfSlashes[6] + 1] +
+                    lastFoundOnt.line[indexesOfSlashes[6] + 2]
+                )
+              : Number(lastFoundOnt.line[indexesOfSlashes[6] + 1]);
+          }
+        }
+      )
+      .finally(() => setIsGettingOnuPosition(false));
+  }
 
   const isThereUnprovisionedONUs = !noUnprovisionedONU && unprovisionedONU;
 
@@ -135,6 +203,7 @@ export const UnprovisionedOnts = ({
                   <span>{serialNumberWithTwoDots}</span>
                   <PrimaryButton
                     size="xs"
+                    isLoading={isGettingOnuPosition}
                     onClick={() => handleUnprovisionedONUAdditionToForm(line)}
                   >
                     Adicionar ao formulário
