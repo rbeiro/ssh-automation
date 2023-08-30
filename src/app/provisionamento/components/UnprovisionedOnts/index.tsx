@@ -11,12 +11,12 @@ import { useSearchParams } from "next/navigation";
 
 interface BaseProps {
   currentAdsName: string;
-  currentOLTName: string;
+  currentVendorName: string;
 }
 
 export const UnprovisionedOnts = ({
   currentAdsName,
-  currentOLTName,
+  currentVendorName,
 }: BaseProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedUnprovisionedONT, setSelectedUnprovisionedONT] = useAtom(
@@ -92,7 +92,7 @@ export const UnprovisionedOnts = ({
           {
             params: {
               currentAdsName,
-              currentOLTName,
+              currentVendorName,
             },
           },
 
@@ -100,22 +100,13 @@ export const UnprovisionedOnts = ({
         )
         .then((response) => {
           if (response.status == 201) {
-            setUnprovisionedONU(
-              currentAdsName === "ADS 10"
-                ? [
-                    {
-                      id: "teste",
-                      line: "176        1/1/1/11   ALCLFC20A863 DEFAULT ",
-                    },
-                  ]
-                : response.data.commandLineResult
-            );
+            setUnprovisionedONU(response.data.commandLineResult);
           }
         })
         .finally(() => setIsLoading(false));
     }
     getUnprovisionedONUs();
-  }, [currentAdsName, currentOLTName]);
+  }, [currentAdsName, currentVendorName]);
 
   return (
     <aside className={styles["Container"]}>

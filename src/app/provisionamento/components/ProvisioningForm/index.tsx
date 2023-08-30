@@ -22,20 +22,20 @@ const provisioningSchema = z.object({
   clientNameOLT: z.string(),
   clientNameOLT2: z.string(),
   currentAdsName: z.string(),
-  currentOLTName: z.string(),
+  currentVendorName: z.string(),
 });
 
 type ProvisioningFormInput = z.input<typeof provisioningSchema>;
 
 interface ProvisioningFormProps {
   currentAdsName: string;
-  currentOLTName: string;
+  currentVendorName: string;
   onFormResult?: (data: { id: string; line: string }[] | null) => void;
 }
 
 export const ProvisioningForm = ({
   currentAdsName,
-  currentOLTName,
+  currentVendorName,
   onFormResult,
 }: ProvisioningFormProps) => {
   const [selectedUnprovisionedONT] = useAtom(selectedUnprovisionedONTAtom);
@@ -50,7 +50,7 @@ export const ProvisioningForm = ({
     resolver: zodResolver(provisioningSchema),
     defaultValues: {
       currentAdsName,
-      currentOLTName,
+      currentVendorName,
     },
   });
 

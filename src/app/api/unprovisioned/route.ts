@@ -8,13 +8,16 @@ const fetchCache = "force-no-store";
 
 interface BodyRequestParams {
   currentAdsName: string;
-  currentOLTName: string;
+  currentVendorName: string;
 }
 
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
-  console.log(request.method);
-  if (session?.user.role !== "ADMIN") {
+  const isUserAdmin = session?.user.role === "ADMIN";
+  const isUserSuperAdmin = session?.user.role === "SUPERADMIN";
+  const isUserAllowed = isUserAdmin || isUserSuperAdmin ? true : false;
+  console.log(isUserAllowed);
+  if (!isUserAllowed) {
     return NextResponse.json({ error: "You're not allowed" }, { status: 405 });
   }
 
@@ -27,9 +30,9 @@ export async function POST(request: Request) {
   const sshClient = new Client();
   const outputData: Array<{ id: string; line: string }> = [];
 
-  const currentOltData = await prisma.olt.findFirst({
+  const currentVendorData = await prisma.vendor.findFirst({
     where: {
-      name: params.currentOLTName,
+      name: params.currentVendorName,
     },
     select: {
       name: true,
@@ -37,16 +40,16 @@ export async function POST(request: Request) {
     },
   });
 
-  const doesAdsExsit = Array.isArray(currentOltData?.relatedAds);
+  const doesAdsExsit = Array.isArray(currentVendorData?.relatedAds);
 
   if (!doesAdsExsit) {
     return NextResponse.json(
-      { error: "No ADS Found at this OLT" },
+      { error: "No ADS Found at this Vendor" },
       { status: 405 }
     );
   }
 
-  const currentAdsData = currentOltData?.relatedAds.find(
+  const currentAdsData = currentVendorData?.relatedAds.find(
     ({ name }) => name === params.currentAdsName
   );
 
@@ -57,8 +60,6 @@ export async function POST(request: Request) {
     );
   }
 
-  console.log(currentAdsData.ipAddress);
-  console.log(currentAdsData.port);
   const connectToSshAndExecuteCommands = () => {
     return new Promise((resolve, reject) => {
       sshClient // Connect to the SSH server

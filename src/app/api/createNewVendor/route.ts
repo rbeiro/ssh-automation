@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "You're not allowed" }, { status: 405 });
   }
 
-  const response = await prisma.olt.create({
+  const response = await prisma.vendor.create({
     data: {
       name,
     },

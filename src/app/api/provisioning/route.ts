@@ -14,7 +14,7 @@ interface BodyRequestParams {
   clientNameOLT: string;
   clientNameOLT2: string;
   currentAdsName: string;
-  currentOLTName: string;
+  currentVendorName: string;
 }
 
 export async function POST(request: Request) {
@@ -31,9 +31,9 @@ export async function POST(request: Request) {
   const { params }: { params: BodyRequestParams } = await request.json();
   const outputData: Array<{ id: string; line: string }> = [];
 
-  const currentOltData = await prisma.olt.findFirst({
+  const currentVendorData = await prisma.vendor.findFirst({
     where: {
-      name: params.currentOLTName,
+      name: params.currentVendorName,
     },
     select: {
       name: true,
@@ -41,13 +41,13 @@ export async function POST(request: Request) {
     },
   });
 
-  const doesAdsExsit = Array.isArray(currentOltData?.relatedAds);
+  const doesAdsExsit = Array.isArray(currentVendorData?.relatedAds);
 
   if (!doesAdsExsit) {
     return NextResponse.json({ error: "No ADS Found" }, { status: 405 });
   }
 
-  const currentAdsData = currentOltData?.relatedAds.find(
+  const currentAdsData = currentVendorData?.relatedAds.find(
     ({ name }) => name === params.currentAdsName
   );
 

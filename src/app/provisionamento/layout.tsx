@@ -3,25 +3,24 @@ import "server-only";
 import { AsideProvisioningMenu } from "@/components/AsideProvisioningMenu";
 import styles from "./styles..module.scss";
 import { ReactNode } from "react";
-import { getAllOLT } from "@/utils/getAllOLTs";
+import { getAllVendors } from "@/utils/getAllVendors";
 
 export default async function ProvisioningLayout({
   children,
 }: {
   children: ReactNode;
 }) {
-  const allOlts:
+  const allVendors:
     | Array<{
         name: string;
         relatedAds: {
           name: string;
         }[];
       }>
-    | {} = await getAllOLT();
-  console.log(allOlts);
+    | {} = await getAllVendors();
   return (
     <main className={styles["ProvisioningWrapper"]}>
-      <AsideProvisioningMenu items={allOlts} />
+      <AsideProvisioningMenu items={allVendors} />
       {children}
     </main>
   );

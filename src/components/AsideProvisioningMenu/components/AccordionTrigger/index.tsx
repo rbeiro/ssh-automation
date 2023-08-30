@@ -21,7 +21,7 @@ const adsCreationSchema = z.object({
   name: z.string(),
   ipAddress: z.string(),
   port: z.string(),
-  fromOlt: z.string(),
+  vendorName: z.string(),
 });
 
 type AdsCreationFormInput = z.input<typeof adsCreationSchema>;
@@ -32,6 +32,7 @@ interface BaseProps {
     name: string;
   }>;
   value: string;
+  vendorName: string;
   onItemSelection?: (itemName: string, accordionTitle: string) => void;
 }
 
@@ -40,10 +41,12 @@ export const AccordionTrigger = ({
   value,
   onItemSelection,
   options,
+  vendorName,
 }: BaseProps) => {
   const searchParams = useSearchParams();
 
   const { data: session } = useSession();
+  console.log(vendorName);
 
   const currentADSNumber = searchParams.get("currentADSNumber");
   const currentADSName = searchParams.get("currentADSName");
@@ -51,9 +54,8 @@ export const AccordionTrigger = ({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const queryClient = useQueryClient();
-
   const { data: initialReactQueryData } = useQuery({
-    queryKey: [`ads-${currentADSName}`],
+    queryKey: [`ads-${vendorName}`],
     queryFn: (params) => {
       return api.post("/createNewADS", params);
     },
@@ -61,31 +63,37 @@ export const AccordionTrigger = ({
     enabled: false,
   });
 
+  console.log(initialReactQueryData);
+
   const mutation = useMutation({
     mutationFn: (params) => {
       return api.post("/createNewADS", params);
     },
 
     onMutate: async ({ name }: AdsCreationFormInput) => {
-      await queryClient.cancelQueries({ queryKey: [`ads-${currentADSName}`] });
+      await queryClient.cancelQueries({ queryKey: [`ads-${vendorName}`] });
 
-      const previousOltData = queryClient.getQueryData<typeof options>([
-        `ads-${currentADSName}`,
+      const previousVendorData = queryClient.getQueryData<typeof options>([
+        `ads-${vendorName}`,
       ]);
 
-      queryClient.setQueryData([`ads-${currentADSName}`], (oldData: any) => [
+      queryClient.setQueryData([`ads-${vendorName}`], (oldData: any) => [
         ...oldData,
         { name },
       ]);
 
-      return { previousOltData };
+      return { previousVendorData };
     },
 
     onError: (err, newItem, context: any) => {
-      queryClient.setQueryData(
-        [`ads-${currentADSName}`],
-        context.previousOltData
-      );
+      if (context) {
+        queryClient.setQueryData(
+          [`ads-${vendorName}`],
+          context.previousVendorData
+        );
+      }
+
+      console.log(err);
     },
     onSuccess: () => {
       setIsDialogOpen(false);
@@ -93,7 +101,7 @@ export const AccordionTrigger = ({
     },
 
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: [`ads-${currentADSName}`] });
+      queryClient.invalidateQueries({ queryKey: [`ads-${vendorName}`] });
     },
   });
 
@@ -109,19 +117,19 @@ export const AccordionTrigger = ({
       name: "",
       ipAddress: "",
       port: "",
-      fromOlt: currentADSName || "",
+      vendorName,
     },
   });
 
   function handleCreateAds({
     name,
-    fromOlt,
+    vendorName,
     ipAddress,
     port,
   }: AdsCreationFormInput) {
     mutation.mutateAsync({
       name,
-      fromOlt,
+      vendorName,
       ipAddress,
       port,
     });
@@ -141,6 +149,7 @@ export const AccordionTrigger = ({
             const isCurrentItemSelected =
               currentADSName === children &&
               currentADSNumber === name.match(/\d+/g)?.join("");
+            console.log(name);
             return (
               <li
                 data-selected={isCurrentItemSelected}

@@ -5,10 +5,10 @@ import { getServerSession } from "next-auth";
 import "server-only";
 
 export const preload = () => {
-  void getAllOLT();
+  void getAllVendors();
 };
 
-export const getAllOLT = async () => {
+export const getAllVendors = async () => {
   const session = await getServerSession(authOptions);
   const isUserAllowed =
     session?.user.role === "ADMIN" || session?.user.role === "SUPERADMIN"
@@ -19,7 +19,7 @@ export const getAllOLT = async () => {
     return {};
   }
 
-  const allOLTs = await prisma.olt.findMany({
+  const allVendors = await prisma.vendor.findMany({
     select: {
       name: true,
       relatedAds: {
@@ -29,5 +29,5 @@ export const getAllOLT = async () => {
       },
     },
   });
-  return allOLTs;
+  return allVendors;
 };

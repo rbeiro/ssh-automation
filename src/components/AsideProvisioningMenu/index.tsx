@@ -19,11 +19,11 @@ import { z } from "zod";
 import { api } from "@/lib/axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-const oltCreationSchema = z.object({
+const vendorCreationSchema = z.object({
   name: z.string(),
 });
 
-type OltCreationFormInput = z.input<typeof oltCreationSchema>;
+type VendorCreationFormInput = z.input<typeof vendorCreationSchema>;
 
 type BaseProps = {
   items:
@@ -42,33 +42,35 @@ export const AsideProvisioningMenu = ({ items }: BaseProps) => {
   const queryClient = useQueryClient();
 
   const { data: initialReactQueryData } = useQuery({
-    queryKey: ["olt"],
+    queryKey: ["vendor"],
     queryFn: (params) => {
-      return api.post("/createNewOLT", params);
+      return api.post("/createNewVendor", params);
     },
     initialData: items,
     enabled: false,
   });
   const mutation = useMutation({
     mutationFn: (params) => {
-      return api.post("/createNewOLT", params);
+      return api.post("/createNewVendor", params);
     },
 
     onMutate: async ({ name }: { name: string }) => {
-      await queryClient.cancelQueries({ queryKey: ["olt"] });
+      await queryClient.cancelQueries({ queryKey: ["vendor"] });
 
-      const previousOltData = queryClient.getQueryData<typeof items>(["olt"]);
-
-      queryClient.setQueryData(["olt"], (oldData: any) => [
-        ...oldData,
-        { name, relatedAds: [] },
+      const previousVendorData = queryClient.getQueryData<typeof items>([
+        "vendor",
       ]);
 
-      return { previousOltData };
+      queryClient.setQueryData(["vendor"], (oldData: any) => {
+        console.log(oldData);
+        return [...oldData, { name, relatedAds: [] }];
+      });
+
+      return { previousVendorData };
     },
 
     onError: (err, newItem, context: any) => {
-      queryClient.setQueryData(["olt"], context.previousOltData);
+      queryClient.setQueryData(["vendor"], context.previousVendorData);
     },
     onSuccess: () => {
       setIsDialogOpen(false);
@@ -76,7 +78,7 @@ export const AsideProvisioningMenu = ({ items }: BaseProps) => {
     },
 
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["olt"] });
+      queryClient.invalidateQueries({ queryKey: ["vendor"] });
     },
   });
 
@@ -85,8 +87,8 @@ export const AsideProvisioningMenu = ({ items }: BaseProps) => {
     handleSubmit,
     setValue,
     formState: { isSubmitting, errors },
-  } = useForm<OltCreationFormInput>({
-    resolver: zodResolver(oltCreationSchema),
+  } = useForm<VendorCreationFormInput>({
+    resolver: zodResolver(vendorCreationSchema),
     defaultValues: {
       name: "",
     },
@@ -123,11 +125,12 @@ export const AsideProvisioningMenu = ({ items }: BaseProps) => {
     );
   }
 
-  async function handleOltCreation({ name }: OltCreationFormInput) {
-    mutation.mutateAsync({
+  async function handleVendorCreation({ name }: VendorCreationFormInput) {
+    mutation.mutate({
       name,
     });
   }
+
   return (
     <aside className={styles["AsideContainer"]}>
       <nav className={styles["AsideWrapper"]}>
@@ -140,16 +143,19 @@ export const AsideProvisioningMenu = ({ items }: BaseProps) => {
         >
           <ul>
             {Array.isArray(initialReactQueryData) ? (
-              initialReactQueryData.map(({ name, relatedAds }, index) => (
-                <AccordionTrigger
-                  key={name}
-                  onItemSelection={onItemSelection}
-                  value={`item-${index + 1}`}
-                  options={relatedAds}
-                >
-                  {name}
-                </AccordionTrigger>
-              ))
+              initialReactQueryData.map(({ name, relatedAds }, index) => {
+                return (
+                  <AccordionTrigger
+                    key={name}
+                    onItemSelection={onItemSelection}
+                    value={`item-${index + 1}`}
+                    options={relatedAds}
+                    vendorName={name}
+                  >
+                    {name}
+                  </AccordionTrigger>
+                );
+              })
             ) : (
               <li className={styles["NotFound"]}>Nada encontrado</li>
             )}
@@ -161,15 +167,15 @@ export const AsideProvisioningMenu = ({ items }: BaseProps) => {
               <div>
                 <PrimaryButton size="sm" full isLoading={isSubmitting}>
                   <PlusCircledIcon />
-                  Adicionar nova OLT
+                  Adicionar novo vendor
                 </PrimaryButton>
               </div>
             </Dialog.Trigger>
 
-            <DialogPortal title="Adicionar nova OLT">
+            <DialogPortal title="Adicionar novo vendor">
               <form
                 className={styles["DialogContent"]}
-                onSubmit={handleSubmit(handleOltCreation)}
+                onSubmit={handleSubmit(handleVendorCreation)}
               >
                 <Input label="Nome" placeholder="Nokia" {...register("name")} />
 

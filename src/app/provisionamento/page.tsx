@@ -19,7 +19,7 @@ export default function ProvisioningPage() {
 
   const [currentAdsData, setCurrentAdsData] = useState({
     currentADSNumber: "",
-    currentOLTName: "",
+    currentVendorName: "",
   });
 
   const [commandLineResult, setCommandLineResult] = useState<
@@ -29,7 +29,7 @@ export default function ProvisioningPage() {
   useEffect(() => {
     setCurrentAdsData({
       currentADSNumber: searchParams.get("currentADSNumber") || "",
-      currentOLTName: searchParams.get("currentADSName") || "",
+      currentVendorName: searchParams.get("currentADSName") || "",
     });
   }, [searchParams]);
 
@@ -37,7 +37,7 @@ export default function ProvisioningPage() {
   const doesUserHavePermission =
     session?.user.role === "ADMIN" || session?.user.role === "SUPERADMIN";
   const doesSearchParamsHaveBothParams = Boolean(
-    currentAdsData.currentADSNumber && currentAdsData.currentOLTName
+    currentAdsData.currentADSNumber && currentAdsData.currentVendorName
   );
   return (
     <>
@@ -51,18 +51,18 @@ export default function ProvisioningPage() {
           <>
             <div>
               <div className={styles["PageTitle"]}>
-                <h1>{currentAdsData.currentOLTName}</h1>
+                <h1>{currentAdsData.currentVendorName}</h1>
                 <h3>ADS {currentAdsData.currentADSNumber}</h3>
               </div>
               <ProvisioningForm
-                currentOLTName={currentAdsData.currentOLTName}
+                currentVendorName={currentAdsData.currentVendorName}
                 currentAdsName={`ADS ${currentAdsData.currentADSNumber}`}
                 onFormResult={(result) => setCommandLineResult(result)}
               />
             </div>
 
             <UnprovisionedOnts
-              currentOLTName={currentAdsData.currentOLTName}
+              currentVendorName={currentAdsData.currentVendorName}
               currentAdsName={`ADS ${currentAdsData.currentADSNumber}`}
             />
           </>

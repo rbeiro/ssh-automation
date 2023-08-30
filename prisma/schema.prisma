@@ -64,12 +64,12 @@ model VerificationToken {
     @@unique([identifier, token])
 }
 
-model Olt {
+model Vendor {
     id         String @id @default(cuid())
     name       String
     relatedAds Ads[]
 
-    @@map("olt")
+    @@map("vendor")
 }
 
 model Ads {
@@ -77,8 +77,8 @@ model Ads {
     name      String
     ipAddress String
     port      String
-    olt       Olt?    @relation(fields: [oltId], references: [id])
-    oltId     String?
+    vendor    Vendor? @relation(fields: [vendorId], references: [id])
+    vendorId  String?
 
     @@map("ads")
 }

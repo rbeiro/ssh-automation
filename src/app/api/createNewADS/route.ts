@@ -8,11 +8,11 @@ type BodyRequestParams = {
   name: string;
   ipAddress: string;
   port: string;
-  fromOlt: string;
+  vendorName: string;
 };
 
 export async function POST(request: Request) {
-  const { name, ipAddress, port, fromOlt }: BodyRequestParams =
+  const { name, ipAddress, port, vendorName }: BodyRequestParams =
     await request.json();
   const session = await getServerSession(authOptions);
 
@@ -24,9 +24,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "You're not allowed" }, { status: 405 });
   }
 
-  const currentOlt = await prisma.olt.findFirst({
+  console.log("TESTE: " + vendorName);
+
+  const currentVendor = await prisma.vendor.findFirst({
     where: {
-      name: fromOlt,
+      name: vendorName,
     },
   });
 
@@ -35,9 +37,9 @@ export async function POST(request: Request) {
       ipAddress,
       name,
       port,
-      olt: {
+      vendor: {
         connect: {
-          id: currentOlt?.id,
+          id: currentVendor?.id,
         },
       },
     },
