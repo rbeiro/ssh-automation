@@ -4,7 +4,7 @@ import { signOut } from "next-auth/react";
 
 export const SignOutButton = () => {
   return (
-    <PrimaryButton onClick={signOut}>
+    <PrimaryButton onClick={() => signOut()}>
       sair <ArrowRightIcon />
     </PrimaryButton>
   );
