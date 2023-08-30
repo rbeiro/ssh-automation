@@ -12,6 +12,7 @@ import { Button, Input, LoadingSpinner } from "@rbeiro-ui/react-components";
 import { useEffect, useState } from "react";
 import { ProvisioningForm } from "@/components/ProvisioningForm";
 import { DeprovisionForm } from "@/components/DeprovisionForm";
+import { PrimaryButton } from "@/components/PrimaryButton";
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
@@ -117,17 +118,6 @@ export default function Home() {
 
       <div className={styles.box}>
         <h2>Resultado do formulário acima:</h2>
-        <ul className={styles.commandLine}>
-          {commandLineResult &&
-            commandLineResult.map(({ id, line }) => {
-              return <li key={id}>{line}</li>;
-            })}
-
-          {!commandLineResult && isLoading && <LoadingSpinner />}
-          {!commandLineResult && !isLoading && (
-            <li>Nenhum resultado ainda...</li>
-          )}
-        </ul>
       </div>
 
       <DeprovisionForm onFormResult={setDeprovisionCommandLineResult} />
@@ -160,7 +150,7 @@ export default function Home() {
               return (
                 <li key={id} className={styles["unprovisioned__result"]}>
                   <span>{serialNumberWithTwoDots}</span>
-                  <Button
+                  <PrimaryButton
                     size="xs"
                     onClick={() =>
                       handleUnprovisionedONUAdditionToForm(
@@ -169,7 +159,7 @@ export default function Home() {
                     }
                   >
                     Adicionar ao formulário
-                  </Button>
+                  </PrimaryButton>
                 </li>
               );
             })}

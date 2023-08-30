@@ -1,5 +1,8 @@
 import { Client } from "ssh2";
 import { NextResponse } from "next/server";
+import { prisma } from "@/server/db";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/server/auth";
 
 interface BodyRequestParams {
   serialNumber: string;
@@ -10,24 +13,56 @@ interface BodyRequestParams {
   VLANClient: number;
   clientNameOLT: string;
   clientNameOLT2: string;
+  currentAdsName: string;
+  currentOLTName: string;
 }
 
 export async function POST(request: Request) {
+  const session = await getServerSession(authOptions);
   if (request.method !== "POST") {
     return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
   }
+
+  if (session?.user.role !== "ADMIN") {
+    return NextResponse.json({ error: "You're not allowed" }, { status: 405 });
+  }
+
   const sshClient = new Client();
   const { params }: { params: BodyRequestParams } = await request.json();
   const outputData: Array<{ id: string; line: string }> = [];
+
+  const currentOltData = await prisma.olt.findFirst({
+    where: {
+      name: params.currentOLTName,
+    },
+    select: {
+      name: true,
+      relatedAds: true,
+    },
+  });
+
+  const doesAdsExsit = Array.isArray(currentOltData?.relatedAds);
+
+  if (!doesAdsExsit) {
+    return NextResponse.json({ error: "No ADS Found" }, { status: 405 });
+  }
+
+  const currentAdsData = currentOltData?.relatedAds.find(
+    ({ name }) => name === params.currentAdsName
+  );
+
+  if (!currentAdsData) {
+    return NextResponse.json({ error: "No ADS Found" }, { status: 405 });
+  }
 
   const connectToSshAndExecuteCommands = () => {
     return new Promise((resolve, reject) => {
       sshClient // Connect to the SSH server
         .connect({
-          host: process.env.SSH_HOST,
+          host: currentAdsData?.ipAddress,
           password: process.env.SSH_PASS,
           username: process.env.SSH_USER,
-          port: Number(process.env.SSH_PORT),
+          port: Number(currentAdsData?.port),
           algorithms: {
             kex: [
               "diffie-hellman-group1-sha1",
@@ -133,4 +168,3 @@ export async function POST(request: Request) {
   const response = await connectToSshAndExecuteCommands();
   return NextResponse.json({ commandLineResult: response }, { status: 201 });
 }
-``;

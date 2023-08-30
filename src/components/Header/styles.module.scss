@@ -1,0 +1,50 @@
+.Container {
+  position: sticky;
+  top: 0;
+  left: 0;
+  padding: 1rem;
+  background-color: var(--body-background);
+
+  z-index: 100;
+}
+
+.Wrapper {
+  padding: 0.75rem 0.75rem;
+
+  display: flex;
+  justify-content: space-between;
+
+  max-width: calc(1500px - 1rem);
+  width: 100%;
+  margin: 0 auto;
+
+  background-color: var(--color-ui-component);
+  color: var(--color-hiContrast);
+  border-radius: var(--rounded-full);
+}
+
+.Navigation {
+  width: 100%;
+  min-height: 42px;
+  padding-left: 1rem;
+  display: flex;
+  align-items: center;
+  & ul {
+    list-style-type: none;
+  }
+
+  &Link {
+    display: block;
+  }
+
+  &ActiveLink {
+    border-bottom: 1px solid var(--indigo-7);
+  }
+}
+
+.Actions {
+  display: flex;
+  align-items: center;
+
+  gap: 1rem;
+}

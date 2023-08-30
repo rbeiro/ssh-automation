@@ -1,0 +1,20 @@
+.CommandLine {
+  list-style-type: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 3rem;
+  width: 100%;
+  min-height: 24px;
+  height: 100%;
+
+  background: var(--indigo-1);
+  border-radius: var(--rounded-md);
+  color: var(--color-gray12);
+
+  position: relative;
+  & > div {
+    left: 3rem;
+    transform: translateY(-50%);
+  }
+}

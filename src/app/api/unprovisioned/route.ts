@@ -1,23 +1,72 @@
 import { Client } from "ssh2";
 import { NextResponse } from "next/server";
+import { authOptions, getServerAuthSession } from "@/server/auth";
+import { getServerSession } from "next-auth";
+import { prisma } from "@/server/db";
 
 const fetchCache = "force-no-store";
 
-export async function GET(request: Request) {
-  if (request.method !== "GET") {
+interface BodyRequestParams {
+  currentAdsName: string;
+  currentOLTName: string;
+}
+
+export async function POST(request: Request) {
+  const session = await getServerSession(authOptions);
+  console.log(request.method);
+  if (session?.user.role !== "ADMIN") {
+    return NextResponse.json({ error: "You're not allowed" }, { status: 405 });
+  }
+
+  if (request.method !== "POST") {
     return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
   }
+
+  const { params }: { params: BodyRequestParams } = await request.json();
+
   const sshClient = new Client();
   const outputData: Array<{ id: string; line: string }> = [];
 
+  const currentOltData = await prisma.olt.findFirst({
+    where: {
+      name: params.currentOLTName,
+    },
+    select: {
+      name: true,
+      relatedAds: true,
+    },
+  });
+
+  const doesAdsExsit = Array.isArray(currentOltData?.relatedAds);
+
+  if (!doesAdsExsit) {
+    return NextResponse.json(
+      { error: "No ADS Found at this OLT" },
+      { status: 405 }
+    );
+  }
+
+  const currentAdsData = currentOltData?.relatedAds.find(
+    ({ name }) => name === params.currentAdsName
+  );
+
+  if (!currentAdsData) {
+    return NextResponse.json(
+      { error: "This specific ADS was not Found" },
+      { status: 405 }
+    );
+  }
+
+  console.log(currentAdsData.ipAddress);
+  console.log(currentAdsData.port);
   const connectToSshAndExecuteCommands = () => {
     return new Promise((resolve, reject) => {
       sshClient // Connect to the SSH server
         .connect({
-          host: process.env.SSH_HOST,
+          host: currentAdsData?.ipAddress,
           password: process.env.SSH_PASS,
           username: process.env.SSH_USER,
-          port: Number(process.env.SSH_PORT),
+          port: Number(currentAdsData?.port),
           algorithms: {
             kex: [
               "diffie-hellman-group1-sha1",

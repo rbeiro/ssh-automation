@@ -107,4 +107,3 @@ export async function GET(request: Request) {
   const response = await connectToSshAndExecuteCommands();
   return NextResponse.json({ commandLineResult: response }, { status: 201 });
 }
-``;

@@ -1,0 +1,115 @@
+.AccordionItem {
+  overflow: hidden;
+  margin-top: 1px;
+}
+
+.AccordionItem[data-state="open"] {
+  height: 100%;
+}
+
+.AccordionItem:first-child {
+  margin-top: 0;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.AccordionItem:last-child {
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+.AccordionItem:focus-within {
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 0 0 2px var(--color-slate12);
+}
+
+.AccordionHeader {
+  display: flex;
+}
+
+.AccordionTrigger {
+  all: unset;
+  font-family: inherit;
+  background-color: transparent;
+  padding: 0 20px;
+  height: 45px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 15px;
+  line-height: 1;
+
+  &[data-state="open"] {
+    border-bottom: 1px solid var(--color-slate6);
+  }
+}
+
+.AccordionTrigger:hover {
+  cursor: pointer;
+}
+
+.AccordionContent {
+  overflow: hidden;
+  font-size: 15px;
+  &[data-state="open"] {
+    border-bottom: 1px solid var(--color-slate6);
+  }
+}
+.AccordionContent[data-state="open"] {
+  animation: slideDown 300ms cubic-bezier(0.87, 0, 0.13, 1);
+}
+.AccordionContent[data-state="closed"] {
+  animation: slideUp 300ms cubic-bezier(0.87, 0, 0.13, 1);
+}
+
+.AccordionContentText {
+  padding: 15px 20px;
+}
+
+.AccordionChevron {
+  color: var(--color-primary-10);
+  transition: transform 300ms cubic-bezier(0.87, 0, 0.13, 1);
+}
+.AccordionTrigger[data-state="open"] > .AccordionChevron {
+  transform: rotate(180deg);
+}
+
+.MenuOption {
+  padding: 0.5rem 1rem;
+  border-radius: var(--rounded-md);
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--color-ui-component-hover);
+  }
+
+  &[data-selected="true"] {
+    background-color: var(--color-ui-component-selected);
+  }
+}
+
+.DialogContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+@keyframes slideDown {
+  from {
+    max-height: 0;
+  }
+  to {
+    max-height: var(--radix-collapsible-content-height);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    max-height: var(--radix-collapsible-content-height);
+  }
+  to {
+    max-height: 0;
+  }
+}

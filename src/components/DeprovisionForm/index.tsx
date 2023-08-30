@@ -1,11 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button, Input } from "@rbeiro-ui/react-components";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import styles from "./styles.module.scss";
 import { api } from "@/lib/axios";
+import { Input } from "../Input";
+import { PrimaryButton } from "../PrimaryButton";
 
 const provisioningSchema = z.object({
   slotGPON: z.string(),
@@ -56,14 +57,14 @@ export const DeprovisionForm = ({ onFormResult }: ProvisioningFormProps) => {
   }
   return (
     <form className={styles.form} onSubmit={handleSubmit(handleProvising)}>
-      <Input labelName="Slot GPON" {...register("slotGPON")} />
-      <Input labelName="Porta PON" {...register("PONport")} />
-      <Input labelName="Posição da ONU" {...register("ONUposition")} />
+      <Input label="Slot GPON" {...register("slotGPON")} />
+      <Input label="Porta PON" {...register("PONport")} />
+      <Input label="Posição da ONU" {...register("ONUposition")} />
 
       <div className={styles.formButton}>
-        <Button type="submit" isLoading={isLoading}>
+        <PrimaryButton type="submit" isLoading={isLoading}>
           Desprovisionar
-        </Button>
+        </PrimaryButton>
         {status && status}
       </div>
     </form>

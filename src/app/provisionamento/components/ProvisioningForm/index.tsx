@@ -5,8 +5,12 @@ import { z } from "zod";
 
 import styles from "./styles.module.scss";
 import { api } from "@/lib/axios";
-import { Input } from "../Input";
-import { PrimaryButton } from "../PrimaryButton";
+import { Input } from "@/components/Input";
+import { PrimaryButton } from "@/components/PrimaryButton";
+import { selectedUnprovisionedONTAtom } from "@/lib/jotaiAtoms";
+import { useAtom } from "jotai";
+
+import toast from "react-hot-toast";
 
 const provisioningSchema = z.object({
   serialNumber: z.string(),
@@ -17,24 +21,24 @@ const provisioningSchema = z.object({
   VLANClient: z.string(),
   clientNameOLT: z.string(),
   clientNameOLT2: z.string(),
+  currentAdsName: z.string(),
+  currentOLTName: z.string(),
 });
 
 type ProvisioningFormInput = z.input<typeof provisioningSchema>;
 
 interface ProvisioningFormProps {
-  onFormResult: (data: { id: string; line: string }[] | null) => void;
-  unprovisionedONUData?: {
-    serialNumber: string;
-    slotGPON: string;
-    PONport: string;
-  };
+  currentAdsName: string;
+  currentOLTName: string;
+  onFormResult?: (data: { id: string; line: string }[] | null) => void;
 }
 
 export const ProvisioningForm = ({
-  unprovisionedONUData,
+  currentAdsName,
+  currentOLTName,
   onFormResult,
 }: ProvisioningFormProps) => {
-  const [status, setStatus] = useState("");
+  const [selectedUnprovisionedONT] = useAtom(selectedUnprovisionedONTAtom);
   const [isLoading, setIsLoading] = useState(false);
   const {
     register,
@@ -45,28 +49,25 @@ export const ProvisioningForm = ({
   } = useForm<ProvisioningFormInput>({
     resolver: zodResolver(provisioningSchema),
     defaultValues: {
-      serialNumber: "",
-      slotGPON: "",
-      PONport: "",
-      ONUposition: "",
-      QoSProfilePPPoE: "HSI_1G_UP",
-      VLANClient: "",
-      clientNameOLT: "",
-      clientNameOLT2: "",
+      currentAdsName,
+      currentOLTName,
     },
   });
 
+  console.log(errors);
+
   useEffect(() => {
-    if (unprovisionedONUData) {
-      setValue("serialNumber", unprovisionedONUData.serialNumber);
-      setValue("slotGPON", unprovisionedONUData.slotGPON);
-      setValue("PONport", unprovisionedONUData.PONport);
+    if (selectedUnprovisionedONT) {
+      setValue("serialNumber", selectedUnprovisionedONT.serialNumber);
+      setValue("slotGPON", selectedUnprovisionedONT.slotGPON);
+      setValue("PONport", selectedUnprovisionedONT.PONport);
+      setValue("ONUposition", selectedUnprovisionedONT.ONUposition);
     }
-  }, [unprovisionedONUData, setValue]);
+  }, [selectedUnprovisionedONT, setValue]);
 
   async function handleProvising(data: ProvisioningFormInput) {
     setIsLoading(true);
-    onFormResult(null);
+    onFormResult && onFormResult(null);
     api
       .post(
         "/provisioning",
@@ -77,14 +78,17 @@ export const ProvisioningForm = ({
       )
       .then((response) => {
         if (response.status == 201) {
-          onFormResult(response.data.commandLineResult);
-          setStatus("ok");
+          onFormResult && onFormResult(response.data.commandLineResult);
+          toast.success("Comando executado");
         }
       })
       .finally(() => setIsLoading(false));
   }
   return (
-    <form className={styles.form} onSubmit={handleSubmit(handleProvising)}>
+    <form
+      className={styles.ProvisioningForm}
+      onSubmit={handleSubmit(handleProvising)}
+    >
       <Input label="Serial Number da ONT" {...register("serialNumber")} />
       <Input label="Slot GPON" {...register("slotGPON")} />
       <Input label="Porta PON" {...register("PONport")} />
@@ -95,18 +99,18 @@ export const ProvisioningForm = ({
       />
       <Input label="VLAN Client PPPoE" {...register("VLANClient")} />
       <Input
-        label="Descrição para Identificação do Assinante na OLT"
+        label="Descrição assinante"
+        placeholder="Identificação do Assinante na OLT"
         {...register("clientNameOLT")}
       />
       <Input
-        label="Descrição para Identificação do Assinante na CTO e/ou 2ª descrição"
+        label="Identificação do Assinante na CTO"
         {...register("clientNameOLT2")}
       />
       <div className={styles.formButton}>
         <PrimaryButton type="submit" isLoading={isLoading}>
           Provisionar
         </PrimaryButton>
-        {status && status}
       </div>
     </form>
   );

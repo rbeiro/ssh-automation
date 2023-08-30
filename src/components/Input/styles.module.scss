@@ -1,0 +1,94 @@
+.InputContainer {
+  min-height: 56px;
+  padding: 0 !important;
+}
+
+.InputField {
+  border: none;
+  padding-left: 0;
+  padding-right: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  margin-left: 12px;
+  margin-right: 12px;
+  margin-top: 26px;
+  margin-bottom: 10px;
+  background-color: transparent;
+  height: auto !important;
+
+  font-size: 1rem !important;
+
+  line-height: 20px !important;
+
+  &:not(:placeholder-shown) + label {
+    top: 10px !important;
+    transform: scale(0.82);
+    left: 10px;
+    padding: 0 !important;
+  }
+
+  &:not(:placeholder-shown) {
+    & ::placeholder {
+      color: transparent;
+    }
+  }
+
+  &[data-maxcontent="true"]:not(:placeholder-shown) + label {
+    top: 10px !important;
+    transform: scale(0.82);
+    left: 10px;
+    padding: 0 !important;
+
+    transform: translate(0, -50%);
+  }
+
+  &:focus + label {
+    top: 10px !important;
+    transform: scale(0.82);
+    left: 10px;
+
+    padding: 0 !important;
+    color: var(--color-gray12);
+  }
+
+  &:focus::placeholder {
+    color: var(--color-gray8);
+  }
+
+  &:focus[data-maxcontent="true"] + label {
+    left: 10px;
+
+    padding: 0 !important;
+    color: var(--color-gray12);
+    transform: translate(0, -50%);
+    top: 10px !important;
+    transform: scale(0.82);
+  }
+
+  &::placeholder {
+    color: transparent;
+  }
+}
+
+.InputLabel {
+  display: flex;
+  align-items: center;
+  line-height: 0;
+  font-family: inherit;
+
+  background-color: var(--input-label-background);
+  height: 1.125rem;
+  width: max-content;
+  z-index: -1;
+  color: var(--color-gray9);
+
+  position: absolute;
+  top: 50%;
+  left: 1rem;
+  transform: translateY(-50%);
+  transform-origin: 0 0;
+
+  transition-property: top, left, color, font-size, transform, padding;
+  transition-duration: 150ms;
+  transition-timing-function: var(--transition-basic);
+}
