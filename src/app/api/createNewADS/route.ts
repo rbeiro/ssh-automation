@@ -4,8 +4,6 @@ import { authOptions, getServerAuthSession } from "@/server/auth";
 import { getServerSession } from "next-auth";
 import { prisma } from "@/server/db";
 
-const fetchCache = "force-no-store";
-
 type BodyRequestParams = {
   name: string;
   ipAddress: string;

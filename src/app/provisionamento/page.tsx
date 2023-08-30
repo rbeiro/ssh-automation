@@ -11,6 +11,8 @@ import toast, { Toaster } from "react-hot-toast";
 import { CommandLine } from "@/components/CommandLine";
 import { useEffect, useState } from "react";
 
+export const revalidate = 10;
+
 export default function ProvisioningPage() {
   const { data: session } = useSession();
   const searchParams = useSearchParams();
