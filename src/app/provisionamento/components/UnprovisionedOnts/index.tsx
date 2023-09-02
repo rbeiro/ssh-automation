@@ -24,10 +24,6 @@ export const UnprovisionedOnts = ({
     selectedUnprovisionedONTAtom
   );
 
-  const [commandLineResult, setCommandLineResult] = useState<
-    { id: string; line: string }[] | null
-  >(null);
-
   const [unprovisionedONU, setUnprovisionedONU] = useState<
     { id: string; line: string }[] | null
   >(null);
@@ -168,16 +164,7 @@ export const UnprovisionedOnts = ({
         )
         .then((response) => {
           if (response.status == 201) {
-            setUnprovisionedONU(
-              currentAdsName === "ADS 10"
-                ? [
-                    {
-                      id: "teste",
-                      line: "176        1/1/1/11   ALCLFC20A863 DEFAULT ",
-                    },
-                  ]
-                : response.data.commandLineResult
-            );
+            setUnprovisionedONU(response.data.commandLineResult);
           }
         })
         .finally(() => setIsLoading(false));
