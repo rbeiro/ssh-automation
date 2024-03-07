@@ -1,20 +1,19 @@
 import { Client } from "ssh2";
 import { NextResponse } from "next/server";
+import { authOptions, getServerAuthSession } from "@/server/auth";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/server/auth";
+import { prisma } from "@/server/db";
+
+const fetchCache = "force-no-store";
 
 interface BodyRequestParams {
-  slotGPON: number;
-  PONport: number;
-  ONUposition: number;
+  currentAdsName: string;
+  currentVendorName: string;
+  serialNumber: string;
 }
 
-export async function GET(request: Request) {
+export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
-  if (request.method !== "GET") {
-    return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
-  }
-
   const isUserAllowed =
     session?.user.role === "ADMIN" || session?.user.role === "SUPERADMIN"
       ? true
@@ -24,18 +23,54 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "You're not allowed" }, { status: 405 });
   }
 
+  if (request.method !== "POST") {
+    return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
+  }
+
   const { params }: { params: BodyRequestParams } = await request.json();
+
   const sshClient = new Client();
   const outputData: Array<{ id: string; line: string }> = [];
+
+  const currentVendorData = await prisma.vendor.findFirst({
+    where: {
+      name: params.currentVendorName,
+    },
+    select: {
+      name: true,
+      relatedAds: true,
+    },
+  });
+
+  const doesAdsExist = Array.isArray(currentVendorData?.relatedAds);
+
+  if (!doesAdsExist) {
+    return NextResponse.json(
+      { error: "No ADS Found at this Vendor" },
+      { status: 405 }
+    );
+  }
+
+  const currentAdsData = currentVendorData?.relatedAds.find(({ name }) => {
+    console.log("Ads name: " + name);
+    return name === params.currentAdsName;
+  });
+
+  if (!currentAdsData) {
+    return NextResponse.json(
+      { error: "This specific ADS was not Found" },
+      { status: 405 }
+    );
+  }
 
   const connectToSshAndExecuteCommands = () => {
     return new Promise((resolve, reject) => {
       sshClient // Connect to the SSH server
         .connect({
-          host: process.env.SSH_HOST,
+          host: currentAdsData?.ipAddress,
           password: process.env.SSH_PASS,
           username: process.env.SSH_USER,
-          port: Number(process.env.SSH_PORT),
+          port: Number(currentAdsData?.port),
           algorithms: {
             kex: [
               "diffie-hellman-group1-sha1",
@@ -92,16 +127,10 @@ export async function GET(request: Request) {
               }
             });
 
-          const ONTInterfaceBase = `1/1/${params.slotGPON}/${params.PONport}/${params.ONUposition}`;
+          stream.stdin.write(
+            `show equipment ont slot | match match exact: ${params.serialNumber}\n`
+          );
 
-          stream.stdin.write(
-            `configure equipment ont interface ${ONTInterfaceBase} admin-state down\n`
-          );
-          stream.stdin.write(`exit\n`);
-          stream.stdin.write(
-            `configure equipment ont no interface ${ONTInterfaceBase}\n`
-          );
-          stream.stdin.write(`exit\n`);
           stream.stdin.write("end");
         });
 
@@ -118,5 +147,7 @@ export async function GET(request: Request) {
   };
 
   const response = await connectToSshAndExecuteCommands();
+
   return NextResponse.json({ commandLineResult: response }, { status: 201 });
 }
+``;

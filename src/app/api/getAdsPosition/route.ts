@@ -15,10 +15,11 @@ interface BodyRequestParams {
 
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
-  const isUserAdmin = session?.user.role === "ADMIN";
-  const isUserSuperAdmin = session?.user.role === "SUPERADMIN";
-  const isUserAllowed = isUserAdmin || isUserSuperAdmin ? true : false;
-  console.log(isUserAllowed);
+  const isUserAllowed =
+    session?.user.role === "ADMIN" || session?.user.role === "SUPERADMIN"
+      ? true
+      : false;
+
   if (!isUserAllowed) {
     return NextResponse.json({ error: "You're not allowed" }, { status: 405 });
   }

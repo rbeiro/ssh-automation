@@ -11,13 +11,13 @@ import styles from "./styles.module.scss";
 interface BaseProps {
   numberOfInputs?: number;
   onValueChange?: (inputValue: string) => void;
-  onValueEnter?: (inputValue: string) => void;
+  onMaxCaracters?: (inputValue: string) => void;
 }
 
 const PassCodeInput = ({
   numberOfInputs = 6,
   onValueChange,
-  onValueEnter,
+  onMaxCaracters,
 }: BaseProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -186,13 +186,13 @@ const PassCodeInput = ({
   useEffect(() => {
     inputRefsArray[currentIndex]?.current?.focus();
     onValueChange && onValueChange(letters.join().replace(/,/g, ""));
-  }, [inputRefsArray, currentIndex, letters, onValueChange, onValueEnter]);
+  }, [inputRefsArray, currentIndex, letters, onValueChange, onMaxCaracters]);
 
   useEffect(() => {
     const isLetterArrayFilled = letters.filter((letter) => letter !== "");
 
     if (isLetterArrayFilled.length === numberOfInputs)
-      onValueEnter && onValueEnter(letters.join().replace(/,/g, ""));
+      onMaxCaracters && onMaxCaracters(letters.join().replace(/,/g, ""));
   }, [letters]);
 
   useEffect(() => {

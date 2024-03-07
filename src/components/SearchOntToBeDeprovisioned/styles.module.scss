@@ -1,0 +1,54 @@
+.UnProvisioningWrapper {
+  max-width: 1500px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 1rem;
+  background-color: var(--color-ui-component);
+  border-radius: var(--rounded-lg);
+}
+
+.UnProvisioningContainer {
+  display: flex;
+  flex-direction: column;
+  max-width: 762px;
+
+  gap: 1rem;
+}
+
+.PageTitle {
+  display: flex;
+  gap: 1rem;
+  align-items: baseline;
+  margin-bottom: 1rem;
+}
+.Container {
+  background-color: var(--indigo-1);
+  padding: 1rem;
+  border-radius: var(--rounded-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  height: max-content;
+}
+
+.UnprovisionedOntsLisItem {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.LoadingCommand {
+  position: relative;
+  width: 220px;
+}
+
+.CommandLineResult {
+  list-style: none;
+}
+
+.SearchOntForm {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}

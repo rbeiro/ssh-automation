@@ -3,11 +3,11 @@
 import { PrimaryButton } from "@/components/PrimaryButton";
 import styles from "./styles.module.scss";
 import { useEffect, useState } from "react";
-import { useAtom } from "jotai";
-import { selectedUnprovisionedONTAtom } from "@/lib/jotaiAtoms";
+import { useSetAtom } from "jotai";
 import { api } from "@/lib/axios";
 import { LoadingSpinner } from "@rbeiro-ui/react-components";
-import { useSearchParams } from "next/navigation";
+import { getOntSerialNumberFromCommandLine } from "@/utils/getOntSerialNumberFromCommandLine";
+import { selectedUnprovisionedONTAtom } from "@/lib/jotai/provisioningStore";
 
 interface BaseProps {
   currentAdsName: string;
@@ -20,9 +20,7 @@ export const UnprovisionedOnts = ({
 }: BaseProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isGettingOnuPosition, setIsGettingOnuPosition] = useState(false);
-  const [selectedUnprovisionedONT, setSelectedUnprovisionedONT] = useAtom(
-    selectedUnprovisionedONTAtom
-  );
+  const setSelectedUnprovisionedONT = useSetAtom(selectedUnprovisionedONTAtom);
 
   const [unprovisionedONU, setUnprovisionedONU] = useState<
     { id: string; line: string }[] | null
@@ -33,16 +31,9 @@ export const UnprovisionedOnts = ({
     while ((i = string.indexOf(substring, i + 1)) >= 0) a.push(i);
     return a;
   }
-  function getSerialNumberFromCommandLine(line: string) {
-    const startOfSerial = line.indexOf("ALCL");
-    const serialNumber = line.slice(startOfSerial, startOfSerial + 12);
-    const serialNumberWithTwoDots =
-      serialNumber.slice(0, 4) + ":" + serialNumber.slice(4);
 
-    return serialNumberWithTwoDots;
-  }
   async function handleUnprovisionedONUAdditionToForm(string: string) {
-    const serialNumberWithTwoDots = getSerialNumberFromCommandLine(string);
+    const serialNumberWithTwoDots = getOntSerialNumberFromCommandLine(string);
     const indexesOfSlashes = locations("/", string);
 
     const doesSecondNumberOfSlotGPONExist =
@@ -183,7 +174,7 @@ export const UnprovisionedOnts = ({
               if (!line.includes("ALCL")) return;
 
               const serialNumberWithTwoDots =
-                getSerialNumberFromCommandLine(line);
+                getOntSerialNumberFromCommandLine(line);
 
               return (
                 <li key={id} className={styles["UnprovisionedOntsLisItem"]}>

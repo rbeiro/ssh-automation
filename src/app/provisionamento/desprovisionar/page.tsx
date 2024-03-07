@@ -1,18 +1,18 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { ProvisioningForm } from "./components/ProvisioningForm";
-import { UnprovisionedOnts } from "./components/UnprovisionedOnts";
 import styles from "./styles..module.scss";
 
 import useSearchParams from "@/utils/useSearchParams";
-import { CommandLine } from "@/components/CommandLine";
 import { useEffect, useState } from "react";
+import { UnProvisioningForm } from "../../../components/UnprovisioningForm";
+import { CommandLine } from "@/components/CommandLine";
+import { SearchOntToBeDeprovisioned } from "@/components/SearchOntToBeDeprovisioned";
 
 export const revalidate = 10;
 
 export default function ProvisioningPage() {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const searchParams = useSearchParams();
 
   const [currentAdsData, setCurrentAdsData] = useState({
@@ -39,14 +39,10 @@ export default function ProvisioningPage() {
   );
   return (
     <>
-      <div className={styles["ProvisioningContainer"]}>
-        {
-          {
-            authenticated: null,
-            unauthenticated: <h1>Você não possui acesso, faça login</h1>,
-            loading: <h1>Carregando...</h1>,
-          }[status]
-        }
+      <div className={styles["UnprovisioningContainer"]}>
+        {(!doesUserHavePermission || isUserLoggedOut) && (
+          <h1>Você não possui acesso, faça login</h1>
+        )}
 
         {doesUserHavePermission && doesSearchParamsHaveBothParams && (
           <>
@@ -55,14 +51,14 @@ export default function ProvisioningPage() {
                 <h1>{currentAdsData.currentVendorName}</h1>
                 <h3>ADS {currentAdsData.currentADSNumber}</h3>
               </div>
-              <ProvisioningForm
+              <UnProvisioningForm
                 currentVendorName={currentAdsData.currentVendorName}
                 currentAdsName={`ADS ${currentAdsData.currentADSNumber}`}
                 onFormResult={(result) => setCommandLineResult(result)}
               />
             </div>
 
-            <UnprovisionedOnts
+            <SearchOntToBeDeprovisioned
               currentVendorName={currentAdsData.currentVendorName}
               currentAdsName={`ADS ${currentAdsData.currentADSNumber}`}
             />
@@ -70,7 +66,7 @@ export default function ProvisioningPage() {
         )}
 
         {doesUserHavePermission && !doesSearchParamsHaveBothParams && (
-          <h2>Selecione uma ADS para iniciar o provisionamento</h2>
+          <h2>Selecione uma ADS para iniciar o desprovisionamento</h2>
         )}
 
         <CommandLine commandLineResult={commandLineResult} isLoading={false} />

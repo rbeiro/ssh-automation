@@ -12,15 +12,17 @@ interface InputProps extends HTMLAttributes<HTMLInputElement> {
 
 const Input = React.forwardRef(
   (
-    { label, placeholder, errorMessage, ...props }: InputProps,
+    { label, placeholder, onChange, errorMessage, ...props }: InputProps,
     forwardedRef
   ) => {
+    console.log(onChange);
     return (
       <InputBase.Root>
         <InputBase.Content className={styles["InputContainer"]}>
           <InputBase.DefaultField
             placeholder={placeholder}
             ref={forwardedRef}
+            onChange={onChange}
             className={styles["InputField"]}
             {...props}
           />

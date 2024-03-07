@@ -5,6 +5,9 @@
 
 .AsideWrapper {
   position: sticky;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   top: calc(74px + 2rem + 2px);
   left: 0;
   & ul {
@@ -13,6 +16,8 @@
     gap: 4px;
     list-style-type: none;
   }
+
+  margin-bottom: 1rem;
 }
 
 .AccordionRoot {

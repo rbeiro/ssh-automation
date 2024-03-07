@@ -5,8 +5,9 @@ import { z } from "zod";
 
 import styles from "./styles.module.scss";
 import { api } from "@/lib/axios";
-import { Input } from "../Input";
-import { PrimaryButton } from "../PrimaryButton";
+import { Input } from "@/components/Input";
+import { PrimaryButton } from "@/components/PrimaryButton";
+import toast from "react-hot-toast";
 
 const provisioningSchema = z.object({
   slotGPON: z.string(),
@@ -14,31 +15,25 @@ const provisioningSchema = z.object({
   ONUposition: z.string(),
 });
 
-type ProvisioningFormInput = z.input<typeof provisioningSchema>;
+type UnProvisioningFormInput = z.input<typeof provisioningSchema>;
 
-interface ProvisioningFormProps {
-  onFormResult: (data: { id: string; line: string }[] | null) => void;
+interface UnProvisioningFormProps {
+  currentAdsName: string;
+  currentVendorName: string;
+  onFormResult?: (data: { id: string; line: string }[] | null) => void;
 }
 
-export const DeprovisionForm = ({ onFormResult }: ProvisioningFormProps) => {
-  const [status, setStatus] = useState("");
+export const UnProvisioningForm = ({
+  onFormResult,
+}: UnProvisioningFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const {
-    register,
-    handleSubmit,
-    formState: { isSubmitting, errors },
-  } = useForm<ProvisioningFormInput>({
+  const { register, handleSubmit } = useForm<UnProvisioningFormInput>({
     resolver: zodResolver(provisioningSchema),
-    defaultValues: {
-      slotGPON: "",
-      PONport: "",
-      ONUposition: "",
-    },
   });
 
-  async function handleProvising(data: ProvisioningFormInput) {
+  async function handleUnprovising(data: UnProvisioningFormInput) {
     setIsLoading(true);
-    onFormResult(null);
+    onFormResult && onFormResult(null);
     api
       .post(
         "/provisioning",
@@ -49,23 +44,25 @@ export const DeprovisionForm = ({ onFormResult }: ProvisioningFormProps) => {
       )
       .then((response) => {
         if (response.status == 201) {
-          onFormResult(response.data.commandLineResult);
-          setStatus("ok");
+          onFormResult && onFormResult(response.data.commandLineResult);
+          toast.success("Comando executado");
         }
       })
       .finally(() => setIsLoading(false));
   }
   return (
-    <form className={styles.form} onSubmit={handleSubmit(handleProvising)}>
+    <form
+      className={styles.ProvisioningForm}
+      onSubmit={handleSubmit(handleUnprovising)}
+    >
       <Input label="Slot GPON" {...register("slotGPON")} />
       <Input label="Porta PON" {...register("PONport")} />
       <Input label="Posição da ONU" {...register("ONUposition")} />
 
       <div className={styles.formButton}>
         <PrimaryButton type="submit" isLoading={isLoading}>
-          Desprovisionar
+          Provisionar
         </PrimaryButton>
-        {status && status}
       </div>
     </form>
   );

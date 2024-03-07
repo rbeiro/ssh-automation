@@ -24,8 +24,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "You're not allowed" }, { status: 405 });
   }
 
-  console.log("TESTE: " + vendorName);
-
   const currentVendor = await prisma.vendor.findFirst({
     where: {
       name: vendorName,

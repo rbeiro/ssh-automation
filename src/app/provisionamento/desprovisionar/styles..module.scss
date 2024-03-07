@@ -1,0 +1,15 @@
+.UnprovisioningContainer {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: var(--color-ui-component);
+  border-radius: var(--rounded-lg);
+}
+
+.PageTitle {
+  display: flex;
+  gap: 1rem;
+  align-items: baseline;
+  margin-bottom: 1rem;
+}

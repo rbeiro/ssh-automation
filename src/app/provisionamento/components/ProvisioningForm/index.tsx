@@ -7,10 +7,10 @@ import styles from "./styles.module.scss";
 import { api } from "@/lib/axios";
 import { Input } from "@/components/Input";
 import { PrimaryButton } from "@/components/PrimaryButton";
-import { selectedUnprovisionedONTAtom } from "@/lib/jotaiAtoms";
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 
 import toast from "react-hot-toast";
+import { selectedUnprovisionedONTAtom } from "@/lib/jotai/provisioningStore";
 
 const provisioningSchema = z.object({
   serialNumber: z.string(),
@@ -38,14 +38,13 @@ export const ProvisioningForm = ({
   currentVendorName,
   onFormResult,
 }: ProvisioningFormProps) => {
-  const [selectedUnprovisionedONT] = useAtom(selectedUnprovisionedONTAtom);
+  const selectedUnprovisionedONT = useAtomValue(selectedUnprovisionedONTAtom);
   const [isLoading, setIsLoading] = useState(false);
   const {
     register,
     handleSubmit,
-    control,
     setValue,
-    formState: { isSubmitting, errors },
+    formState: { errors },
   } = useForm<ProvisioningFormInput>({
     resolver: zodResolver(provisioningSchema),
     defaultValues: {
@@ -53,8 +52,6 @@ export const ProvisioningForm = ({
       currentVendorName,
     },
   });
-
-  console.log(errors);
 
   useEffect(() => {
     if (selectedUnprovisionedONT) {
@@ -65,7 +62,7 @@ export const ProvisioningForm = ({
     }
   }, [selectedUnprovisionedONT, setValue]);
 
-  async function handleProvising(data: ProvisioningFormInput) {
+  async function handleProvisioning(data: ProvisioningFormInput) {
     setIsLoading(true);
     onFormResult && onFormResult(null);
     api
@@ -87,7 +84,7 @@ export const ProvisioningForm = ({
   return (
     <form
       className={styles.ProvisioningForm}
-      onSubmit={handleSubmit(handleProvising)}
+      onSubmit={handleSubmit(handleProvisioning)}
     >
       <Input label="Serial Number da ONT" {...register("serialNumber")} />
       <Input label="Slot GPON" {...register("slotGPON")} />

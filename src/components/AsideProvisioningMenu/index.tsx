@@ -8,7 +8,11 @@ import { PrimaryButton } from "@/components/PrimaryButton";
 import { AccordionTrigger } from "./components/AccordionTrigger";
 import * as Accordion from "@radix-ui/react-accordion";
 import * as Dialog from "@radix-ui/react-dialog";
-import { PlusCircledIcon } from "@radix-ui/react-icons";
+import {
+  ArrowRightIcon,
+  ArrowTopRightIcon,
+  PlusCircledIcon,
+} from "@radix-ui/react-icons";
 
 import styles from "./styles.module.scss";
 import { DialogPortal } from "@/components/Dialog";
@@ -18,6 +22,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { api } from "@/lib/axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import Link from "next/link";
+import { ButtonAsLink } from "../ButtonAsLink";
 
 const vendorCreationSchema = z.object({
   name: z.string(),
@@ -49,6 +55,7 @@ export const AsideProvisioningMenu = ({ items }: BaseProps) => {
     initialData: items,
     enabled: false,
   });
+
   const mutation = useMutation({
     mutationFn: (params) => {
       return api.post("/createNewVendor", params);
@@ -65,7 +72,6 @@ export const AsideProvisioningMenu = ({ items }: BaseProps) => {
         console.log(oldData);
         return [...oldData, { name, relatedAds: [] }];
       });
-
       return { previousVendorData };
     },
 
@@ -191,6 +197,10 @@ export const AsideProvisioningMenu = ({ items }: BaseProps) => {
             </DialogPortal>
           </Dialog.Root>
         )}
+
+        <ButtonAsLink full href={"/provisionamento/desprovisionar"}>
+          Desprovisionar <ArrowRightIcon />
+        </ButtonAsLink>
       </nav>
     </aside>
   );

@@ -4,16 +4,16 @@ import styles from "./styles.module.scss";
 import * as Dialog from "@radix-ui/react-dialog";
 import { PrimaryButton } from "@/components/PrimaryButton";
 import { PassCodeInput } from "@/components/PassCodeInput";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { DialogPortal } from "@/components/Dialog";
 import { Input } from "@/components/Input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRightIcon } from "@radix-ui/react-icons";
-import { env } from "@/env.mjs";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import { SetStateAction } from "jotai";
 
 export const LoginButton = () => {
   useEffect(() => {
@@ -29,6 +29,11 @@ export const LoginButton = () => {
     setUserEmail(email);
     setWasConfirmationEmailSent(true);
   }
+
+  function changeUserEmail() {
+    setUserEmail("");
+    setWasConfirmationEmailSent(false);
+  }
   return (
     <Dialog.Root open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <Dialog.Trigger asChild>
@@ -38,6 +43,7 @@ export const LoginButton = () => {
       {wasConfirmationEmailSent ? (
         <ConfirmCodeContent
           userEmail={userEmail}
+          changeUserEmail={changeUserEmail}
           closeDialog={() => setIsDialogOpen(false)}
         />
       ) : (
@@ -97,11 +103,13 @@ const InsertEmailContent = ({ onEmailSent }: InsertEmailContentProps) => {
 
 type ConfirmCodeContentProps = {
   userEmail: string;
+  changeUserEmail: () => void;
   closeDialog: () => void;
 };
 
 const ConfirmCodeContent = ({
   userEmail,
+  changeUserEmail,
   closeDialog,
 }: ConfirmCodeContentProps) => {
   const router = useRouter();
@@ -116,6 +124,10 @@ const ConfirmCodeContent = ({
   const [verificationSuccessMessage, setVerificationSuccessMessage] =
     useState("");
 
+  function handleChangeUserEmail() {
+    changeUserEmail();
+  }
+
   function handleValueEnter(inputValue: string) {
     const verificaitonCode = inputValue;
 
@@ -126,27 +138,34 @@ const ConfirmCodeContent = ({
       userEmail || ""
     }`;
     toast.promise(
-      fetch(verificationUrl)
-        .then((data) => {
-          if (data.status !== 200) {
+      new Promise((resolve, reject) => {
+        fetch(verificationUrl)
+          .then((data) => {
+            console.log(data.status);
+            if (data.status !== 200) {
+              reject();
+              setVerificationErrorMessage(
+                "O código é inválido. Tente novamente."
+              );
+              return;
+            } else {
+              resolve("Yay");
+              setVerificationSuccessMessage(
+                "Sucesso! Aguarde o redirecionamento da página..."
+              );
+              window.location.reload();
+            }
+          })
+          .catch((err) => {
             setVerificationErrorMessage(
               "O código é inválido. Tente novamente."
             );
-            return;
-          } else {
-            setVerificationSuccessMessage(
-              "Sucesso! Aguarde o redirecionamento da página..."
-            );
-            window.location.reload();
-          }
-        })
-        .catch((err) => {
-          setVerificationErrorMessage("O código é inválido. Tente novamente.");
-        })
-        .finally(() => setIsVerificationLoading(false)),
+          });
+      }),
+
       {
         loading: "Carregando...",
-        error: <b>Não foi possível fazer o login</b>,
+        error: <b>Código inválido, tente novamente.</b>,
         success: <b>Logado com sucesso!</b>,
       }
     );
@@ -155,9 +174,10 @@ const ConfirmCodeContent = ({
     <DialogPortal title="Confirme o código">
       <div className={styles["DialogContent"]}>
         <span>
-          Insira o códgio enviado para o e-mail <b>{userEmail}</b>:
+          Insira o códgio enviado para o e-mail <b>{userEmail}</b>{" "}
+          <button onClick={handleChangeUserEmail}>Trocar e-mail</button>
         </span>
-        <PassCodeInput onValueEnter={handleValueEnter} />
+        <PassCodeInput onMaxCaracters={handleValueEnter} />
       </div>
     </DialogPortal>
   );

@@ -16,7 +16,6 @@ export async function POST(request: Request) {
   const isUserAdmin = session?.user.role === "ADMIN";
   const isUserSuperAdmin = session?.user.role === "SUPERADMIN";
   const isUserAllowed = isUserAdmin || isUserSuperAdmin ? true : false;
-  console.log(isUserAllowed);
   if (!isUserAllowed) {
     return NextResponse.json({ error: "You're not allowed" }, { status: 405 });
   }
@@ -41,7 +40,6 @@ export async function POST(request: Request) {
   });
 
   const doesAdsExsit = Array.isArray(currentVendorData?.relatedAds);
-
   if (!doesAdsExsit) {
     return NextResponse.json(
       { error: "No ADS Found at this Vendor" },
@@ -52,7 +50,7 @@ export async function POST(request: Request) {
   const currentAdsData = currentVendorData?.relatedAds.find(
     ({ name }) => name === params.currentAdsName
   );
-
+  console.log("currentAdsData", params.currentAdsName);
   if (!currentAdsData) {
     return NextResponse.json(
       { error: "This specific ADS was not Found" },
@@ -142,6 +140,8 @@ export async function POST(request: Request) {
   };
 
   const response = await connectToSshAndExecuteCommands();
+
+  console.log(response);
 
   return NextResponse.json({ commandLineResult: response }, { status: 201 });
 }

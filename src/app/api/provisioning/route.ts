@@ -19,6 +19,7 @@ interface BodyRequestParams {
 
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
+  console.log("Inside the provisioning route");
   if (request.method !== "POST") {
     return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
   }
