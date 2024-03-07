@@ -119,11 +119,12 @@ export const UnprovisionedOnts = ({
             if (!ponCount) return;
             const lastFoundOnt = foundOnts[Number(ponCount - 1)];
 
+            if (!lastFoundOnt) return 0;
+
             const indexesOfSlashes = locations("/", lastFoundOnt.line);
             const doesSecondNumberOfSlotGPONExist =
               !!Number(lastFoundOnt.line[indexesOfSlashes[6] + 2]) ||
               Number(lastFoundOnt.line[indexesOfSlashes[6] + 2]) === 0;
-
             return doesSecondNumberOfSlotGPONExist
               ? Number(
                   lastFoundOnt.line[indexesOfSlashes[6] + 1] +
