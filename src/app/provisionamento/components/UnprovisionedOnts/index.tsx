@@ -12,11 +12,13 @@ import { selectedUnprovisionedONTAtom } from "@/lib/jotai/provisioningStore";
 interface BaseProps {
   currentAdsName: string;
   currentVendorName: string;
+  onCommandLineResult?: (data: { id: string; line: string }[] | null) => void;
 }
 
 export const UnprovisionedOnts = ({
   currentAdsName,
   currentVendorName,
+  onCommandLineResult,
 }: BaseProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isGettingOnuPosition, setIsGettingOnuPosition] = useState(false);
@@ -101,6 +103,7 @@ export const UnprovisionedOnts = ({
           status: number;
         }) => {
           if (status == 201) {
+            onCommandLineResult && onCommandLineResult(data.commandLineResult);
             let ponCount;
             data.commandLineResult.forEach(({ line }) => {
               if (line.includes("pon count")) {
