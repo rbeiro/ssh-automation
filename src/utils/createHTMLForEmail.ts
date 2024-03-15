@@ -37,7 +37,7 @@ const html = (params: {
           <tr>
             <td align="center" style="border-radius: 5px;" bgcolor="${color.buttonBackground}"><span "
                 target="_blank"
-                style="font-size: 18px; font-family: Helvetica, Arial, sans-serif; color: ${color.buttonText}; text-decoration: none; border-radius: 5px; padding: 10px 20px; border: 1px solid ${color.buttonBorder}; display: inline-block; font-weight: bold;">${token} ${url}</span></td>
+                style="font-size: 18px; font-family: Helvetica, Arial, sans-serif; color: ${color.buttonText}; text-decoration: none; border-radius: 5px; padding: 10px 20px; border: 1px solid ${color.buttonBorder}; display: inline-block; font-weight: bold;">${token}</span></td>
           </tr>
         </table>
       </td>

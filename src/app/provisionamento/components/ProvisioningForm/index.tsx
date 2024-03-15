@@ -92,6 +92,7 @@ export const ProvisioningForm = ({
       <Input label="Posição da ONU" {...register("ONUposition")} />
       <Input
         label="Perfil de banda QoS Upstream PPoE"
+        defaultValue={"HSI_1G_UP"}
         {...register("QoSProfilePPPoE")}
       />
       <Input label="VLAN Client PPPoE" {...register("VLANClient")} />
