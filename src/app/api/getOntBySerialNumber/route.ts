@@ -128,7 +128,7 @@ export async function POST(request: Request) {
             });
 
           stream.stdin.write(
-            `show equipment ont slot | match match exact: ${params.serialNumber}\n`
+            `show equipment ont interface | match match exact:${params.serialNumber}\n`
           );
 
           stream.stdin.write("end");

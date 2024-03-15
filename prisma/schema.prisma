@@ -83,6 +83,16 @@ model Ads {
     @@map("ads")
 }
 
+model Customer {
+    id   String @id @default(cuid())
+    name String
+}
+
+model Ont {
+    id   String @id @default(cuid())
+    name String
+}
+
 enum Role {
     USER
     ADMIN

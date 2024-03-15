@@ -2,16 +2,20 @@ import { Client } from "ssh2";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/server/auth";
+import { prisma } from "@/server/db";
 
 interface BodyRequestParams {
   slotGPON: number;
   PONport: number;
   ONUposition: number;
+  currentAdsName: string;
+  currentVendorName: string;
 }
 
-export async function GET(request: Request) {
+export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
-  if (request.method !== "GET") {
+  console.log("inside the deprovision route");
+  if (request.method !== "POST") {
     return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
   }
 
@@ -19,12 +23,42 @@ export async function GET(request: Request) {
     session?.user.role === "ADMIN" || session?.user.role === "SUPERADMIN"
       ? true
       : false;
-
   if (!isUserAllowed) {
     return NextResponse.json({ error: "You're not allowed" }, { status: 405 });
   }
+  console.log("isUserAllowed: ", isUserAllowed);
 
   const { params }: { params: BodyRequestParams } = await request.json();
+
+  const currentVendorData = await prisma.vendor.findFirst({
+    where: {
+      name: params.currentVendorName,
+    },
+    select: {
+      name: true,
+      relatedAds: true,
+    },
+  });
+
+  const doesAdsExsit = Array.isArray(currentVendorData?.relatedAds);
+  console.log("doesAdsExsit: ", doesAdsExsit);
+
+  if (!doesAdsExsit) {
+    return NextResponse.json({ error: "No ADS Found" }, { status: 405 });
+  }
+
+  console.log(params.currentAdsName);
+
+  const currentAdsData = currentVendorData?.relatedAds.find(
+    ({ name }) => name === params.currentAdsName
+  );
+
+  console.log("currentAdsData: ", currentAdsData);
+
+  if (!currentAdsData) {
+    return NextResponse.json({ error: "No ADS Found" }, { status: 405 });
+  }
+
   const sshClient = new Client();
   const outputData: Array<{ id: string; line: string }> = [];
 
@@ -32,10 +66,10 @@ export async function GET(request: Request) {
     return new Promise((resolve, reject) => {
       sshClient // Connect to the SSH server
         .connect({
-          host: process.env.SSH_HOST,
+          host: currentAdsData?.ipAddress,
           password: process.env.SSH_PASS,
           username: process.env.SSH_USER,
-          port: Number(process.env.SSH_PORT),
+          port: Number(currentAdsData?.port),
           algorithms: {
             kex: [
               "diffie-hellman-group1-sha1",

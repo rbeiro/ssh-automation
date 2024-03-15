@@ -23,8 +23,7 @@ export async function POST(request: Request) {
   if (request.method !== "POST") {
     return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
   }
-
-  if (session?.user.role !== "ADMIN") {
+  if (session?.user.role === "USER") {
     return NextResponse.json({ error: "You're not allowed" }, { status: 405 });
   }
 
@@ -43,6 +42,7 @@ export async function POST(request: Request) {
   });
 
   const doesAdsExsit = Array.isArray(currentVendorData?.relatedAds);
+  console.log("currentAdsData: ", doesAdsExsit);
 
   if (!doesAdsExsit) {
     return NextResponse.json({ error: "No ADS Found" }, { status: 405 });
@@ -51,6 +51,8 @@ export async function POST(request: Request) {
   const currentAdsData = currentVendorData?.relatedAds.find(
     ({ name }) => name === params.currentAdsName
   );
+
+  console.log("currentAdsData: ", currentAdsData);
 
   if (!currentAdsData) {
     return NextResponse.json({ error: "No ADS Found" }, { status: 405 });
@@ -167,5 +169,10 @@ export async function POST(request: Request) {
   };
 
   const response = await connectToSshAndExecuteCommands();
+
+  /* TODO: Check if success and save to database */
+
+  console.log(response);
+
   return NextResponse.json({ commandLineResult: response }, { status: 201 });
 }

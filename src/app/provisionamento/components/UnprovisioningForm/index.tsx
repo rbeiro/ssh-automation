@@ -13,6 +13,8 @@ const provisioningSchema = z.object({
   slotGPON: z.string(),
   PONport: z.string(),
   ONUposition: z.string(),
+  currentAdsName: z.string(),
+  currentVendorName: z.string(),
 });
 
 type UnProvisioningFormInput = z.input<typeof provisioningSchema>;
@@ -24,11 +26,17 @@ interface UnProvisioningFormProps {
 }
 
 export const UnProvisioningForm = ({
+  currentAdsName,
+  currentVendorName,
   onFormResult,
 }: UnProvisioningFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const { register, handleSubmit } = useForm<UnProvisioningFormInput>({
     resolver: zodResolver(provisioningSchema),
+    defaultValues: {
+      currentAdsName,
+      currentVendorName,
+    },
   });
 
   async function handleUnprovising(data: UnProvisioningFormInput) {
@@ -36,7 +44,7 @@ export const UnProvisioningForm = ({
     onFormResult && onFormResult(null);
     api
       .post(
-        "/provisioning",
+        "/deprovision",
         {
           params: data,
         },
@@ -61,7 +69,7 @@ export const UnProvisioningForm = ({
 
       <div className={styles.formButton}>
         <PrimaryButton type="submit" isLoading={isLoading}>
-          Provisionar
+          Desprovisionar
         </PrimaryButton>
       </div>
     </form>

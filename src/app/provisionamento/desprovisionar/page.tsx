@@ -5,9 +5,9 @@ import styles from "./styles..module.scss";
 
 import useSearchParams from "@/utils/useSearchParams";
 import { useEffect, useState } from "react";
-import { UnProvisioningForm } from "../../../components/UnprovisioningForm";
+import { UnProvisioningForm } from "../components/UnprovisioningForm";
 import { CommandLine } from "@/components/CommandLine";
-import { SearchOntToBeDeprovisioned } from "@/components/SearchOntToBeDeprovisioned";
+import { SearchOntToBeDeprovisioned } from "../components/SearchOntToBeDeprovisioned";
 
 export const revalidate = 10;
 

@@ -9,6 +9,7 @@ import { AccordionTrigger } from "./components/AccordionTrigger";
 import * as Accordion from "@radix-ui/react-accordion";
 import * as Dialog from "@radix-ui/react-dialog";
 import {
+  ArrowLeftIcon,
   ArrowRightIcon,
   ArrowTopRightIcon,
   PlusCircledIcon,
@@ -198,9 +199,17 @@ export const AsideProvisioningMenu = ({ items }: BaseProps) => {
           </Dialog.Root>
         )}
 
-        <ButtonAsLink full href={"/provisionamento/desprovisionar"}>
-          Desprovisionar <ArrowRightIcon />
-        </ButtonAsLink>
+        {pathname?.includes("desprovisionar") && (
+          <ButtonAsLink full href={"/provisionamento"}>
+            <ArrowLeftIcon /> Provisionar
+          </ButtonAsLink>
+        )}
+
+        {!pathname?.includes("desprovisionar") && (
+          <ButtonAsLink full href={"/provisionamento/desprovisionar"}>
+            Desprovisionar <ArrowRightIcon />
+          </ButtonAsLink>
+        )}
       </nav>
     </aside>
   );
